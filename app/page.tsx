@@ -3,7 +3,7 @@ export default function Home() {
     <main className="min-h-screen bg-slate-950 text-white flex flex-col items-center justify-center px-6">
       <section className="max-w-md text-center">
         <h1 className="text-4xl font-bold mb-4">
-          HomeMadeeeee
+          HomeMade
         </h1>
 
         <p className="text-slate-300 mb-8">
