@@ -18,7 +18,7 @@ export default function Hero() {
         </p>
 
         <div className="flex flex-col sm:flex-row gap-4">
-          <PrimaryButton text="Comenzar" />
+          <PrimaryButton text="Comenzar" href="/registro" />
 
           <button className="border border-slate-700 hover:border-orange-400 text-white font-semibold px-6 py-3 rounded-xl transition">
             Ver funciones
