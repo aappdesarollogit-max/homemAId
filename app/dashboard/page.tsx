@@ -18,6 +18,7 @@ type DashboardPageProps = {
     view?: string;
     filter?: string;
     purchase?: string;
+    product?: string;
   }>;
 };
 
@@ -70,6 +71,12 @@ function resolvePurchaseId(purchaseId?: string) {
   return purchases.some((purchase) => purchase.id === purchaseId)
     ? purchaseId
     : purchases[0]?.id;
+}
+
+function resolveProductId(productId?: string) {
+  return inventoryProducts.some((product) => product.id === productId)
+    ? productId
+    : inventoryProducts[0]?.id;
 }
 
 function AppLogo() {
@@ -193,6 +200,45 @@ function InventoryRow({ product }: { product: InventoryProduct }) {
   );
 }
 
+function InventoryLinkRow({
+  product,
+  href,
+  isSelected,
+}: {
+  product: InventoryProduct;
+  href: string;
+  isSelected: boolean;
+}) {
+  return (
+    <Link
+      href={href}
+      className={`flex items-center justify-between gap-4 rounded-3xl border p-4 transition ${
+        isSelected
+          ? "border-violet-400 bg-violet-500/20"
+          : "border-white/10 bg-white/[0.04] hover:bg-white/[0.07]"
+      }`}
+    >
+      <div className="flex items-center gap-4">
+        <div className="flex h-14 w-14 items-center justify-center rounded-2xl bg-white/10 text-3xl">
+          {product.icon}
+        </div>
+        <div>
+          <p className="font-black text-white">{product.name}</p>
+          <p className="mt-1 text-sm text-white/50">
+            {product.category} · {product.quantity}
+          </p>
+        </div>
+      </div>
+      <div className="text-right">
+        <Badge tone={statusTone(product.status)}>{product.statusLabel}</Badge>
+        <p className="mt-2 text-xs font-semibold text-white/45">
+          {product.estimatedDaysLeft} días estimados
+        </p>
+      </div>
+    </Link>
+  );
+}
+
 function OverviewView() {
   const budgetUsage = Math.round(
     (householdSummary.monthlySpend / householdSummary.monthlyBudget) * 100,
@@ -277,8 +323,18 @@ function OverviewView() {
   );
 }
 
-function InventoryView({ activeFilter }: { activeFilter: string }) {
+function InventoryView({
+  activeFilter,
+  selectedProductId,
+}: {
+  activeFilter: string;
+  selectedProductId?: string;
+}) {
   const filteredProducts = filterInventoryProducts(activeFilter);
+  const selectedProduct =
+    inventoryProducts.find((product) => product.id === selectedProductId) ??
+    filteredProducts[0] ??
+    inventoryProducts[0];
 
   return (
     <>
@@ -303,10 +359,59 @@ function InventoryView({ activeFilter }: { activeFilter: string }) {
         ))}
       </div>
 
-      <div className="space-y-3">
-        {filteredProducts.map((product) => (
-          <InventoryRow key={product.id} product={product} />
-        ))}
+      <div className="grid gap-6 xl:grid-cols-[1fr_380px]">
+        <div className="space-y-3">
+          {filteredProducts.map((product) => (
+            <InventoryLinkRow
+              key={product.id}
+              product={product}
+              href={`/dashboard?view=inventario&filter=${activeFilter}&product=${product.id}`}
+              isSelected={product.id === selectedProduct?.id}
+            />
+          ))}
+        </div>
+
+        <aside className="rounded-3xl border border-white/10 bg-white/[0.04] p-6">
+          <p className="text-sm font-black uppercase tracking-[0.18em] text-violet-300">
+            Producto
+          </p>
+          <div className="mt-5 flex items-center gap-4">
+            <div className="flex h-16 w-16 items-center justify-center rounded-3xl bg-white/10 text-4xl">
+              {selectedProduct?.icon}
+            </div>
+            <div>
+              <h2 className="text-2xl font-black">{selectedProduct?.name}</h2>
+              <p className="mt-1 text-sm text-white/50">{selectedProduct?.category}</p>
+            </div>
+          </div>
+
+          <div className="mt-6 space-y-4">
+            <div className="flex items-center justify-between rounded-2xl bg-white/5 p-4">
+              <span className="text-sm font-bold text-white/55">Estado</span>
+              {selectedProduct ? (
+                <Badge tone={statusTone(selectedProduct.status)}>
+                  {selectedProduct.statusLabel}
+                </Badge>
+              ) : null}
+            </div>
+            <div className="flex items-center justify-between rounded-2xl bg-white/5 p-4">
+              <span className="text-sm font-bold text-white/55">Cantidad</span>
+              <span className="font-black">{selectedProduct?.quantity}</span>
+            </div>
+            <div className="flex items-center justify-between rounded-2xl bg-white/5 p-4">
+              <span className="text-sm font-bold text-white/55">Duración estimada</span>
+              <span className="font-black">{selectedProduct?.estimatedDaysLeft} días</span>
+            </div>
+            <div className="flex items-center justify-between rounded-2xl bg-white/5 p-4">
+              <span className="text-sm font-bold text-white/55">Abierto el</span>
+              <span className="font-black">{selectedProduct?.openedAt ?? "Sin registrar"}</span>
+            </div>
+          </div>
+
+          <button className="mt-6 w-full rounded-2xl bg-violet-500 px-5 py-3 text-sm font-black text-white hover:bg-violet-400">
+            Registrar apertura
+          </button>
+        </aside>
       </div>
     </>
   );
@@ -548,8 +653,16 @@ function renderView(
   view: DashboardView,
   activeFilter: string,
   selectedPurchaseId?: string,
+  selectedProductId?: string,
 ) {
-  if (view === "inventario") return <InventoryView activeFilter={activeFilter} />;
+  if (view === "inventario") {
+    return (
+      <InventoryView
+        activeFilter={activeFilter}
+        selectedProductId={selectedProductId}
+      />
+    );
+  }
   if (view === "compras") return <PurchasesView selectedPurchaseId={selectedPurchaseId} />;
   if (view === "consumo") return <ConsumptionView />;
   if (view === "asistente") return <AssistantView />;
@@ -562,10 +675,11 @@ export default async function DashboardPage({ searchParams }: DashboardPageProps
   const activeView = resolveView(params?.view);
   const activeFilter = resolveInventoryFilter(params?.filter);
   const selectedPurchaseId = resolvePurchaseId(params?.purchase);
+  const selectedProductId = resolveProductId(params?.product);
 
   return (
     <DashboardShell activeView={activeView}>
-      {renderView(activeView, activeFilter, selectedPurchaseId)}
+      {renderView(activeView, activeFilter, selectedPurchaseId, selectedProductId)}
     </DashboardShell>
   );
 }
