@@ -16,6 +16,7 @@ import type { DashboardView, InventoryProduct, ProductStatus } from "@/types/dom
 type DashboardPageProps = {
   searchParams?: Promise<{
     view?: string;
+    filter?: string;
   }>;
 };
 
@@ -30,6 +31,38 @@ const validViews = new Set<DashboardView>([
 
 function resolveView(view?: string): DashboardView {
   return validViews.has(view as DashboardView) ? (view as DashboardView) : "inicio";
+}
+
+const inventoryFilters = [
+  { id: "todos", label: "Todos" },
+  { id: "despensa", label: "Despensa" },
+  { id: "lacteos", label: "Lácteos" },
+  { id: "limpieza", label: "Limpieza" },
+  { id: "criticos", label: "Críticos" },
+];
+
+function resolveInventoryFilter(filter?: string): string {
+  return inventoryFilters.some((item) => item.id === filter) ? String(filter) : "todos";
+}
+
+function filterInventoryProducts(filter: string) {
+  if (filter === "criticos") {
+    return inventoryProducts.filter((product) => product.status !== "ok");
+  }
+
+  if (filter === "despensa") {
+    return inventoryProducts.filter((product) => product.category === "Despensa");
+  }
+
+  if (filter === "lacteos") {
+    return inventoryProducts.filter((product) => product.category === "Lácteos");
+  }
+
+  if (filter === "limpieza") {
+    return inventoryProducts.filter((product) => product.category === "Limpieza");
+  }
+
+  return inventoryProducts;
 }
 
 function AppLogo() {
@@ -237,7 +270,9 @@ function OverviewView() {
   );
 }
 
-function InventoryView() {
+function InventoryView({ activeFilter }: { activeFilter: string }) {
+  const filteredProducts = filterInventoryProducts(activeFilter);
+
   return (
     <>
       <SectionHeader
@@ -252,15 +287,17 @@ function InventoryView() {
       />
 
       <div className="mb-5 flex flex-wrap gap-2">
-        {["Todos", "Despensa", "Lácteos", "Limpieza", "Críticos"].map((filter, index) => (
-          <Badge key={filter} tone={index === 0 ? "violet" : "slate"}>
-            {filter}
-          </Badge>
+        {inventoryFilters.map((filter) => (
+          <Link key={filter.id} href={`/dashboard?view=inventario&filter=${filter.id}`}>
+            <Badge tone={activeFilter === filter.id ? "violet" : "slate"}>
+              {filter.label}
+            </Badge>
+          </Link>
         ))}
       </div>
 
       <div className="space-y-3">
-        {inventoryProducts.map((product) => (
+        {filteredProducts.map((product) => (
           <InventoryRow key={product.id} product={product} />
         ))}
       </div>
@@ -461,8 +498,8 @@ function SettingsView() {
   );
 }
 
-function renderView(view: DashboardView) {
-  if (view === "inventario") return <InventoryView />;
+function renderView(view: DashboardView, activeFilter: string) {
+  if (view === "inventario") return <InventoryView activeFilter={activeFilter} />;
   if (view === "compras") return <PurchasesView />;
   if (view === "consumo") return <ConsumptionView />;
   if (view === "asistente") return <AssistantView />;
@@ -473,6 +510,11 @@ function renderView(view: DashboardView) {
 export default async function DashboardPage({ searchParams }: DashboardPageProps) {
   const params = await searchParams;
   const activeView = resolveView(params?.view);
+  const activeFilter = resolveInventoryFilter(params?.filter);
 
-  return <DashboardShell activeView={activeView}>{renderView(activeView)}</DashboardShell>;
+  return (
+    <DashboardShell activeView={activeView}>
+      {renderView(activeView, activeFilter)}
+    </DashboardShell>
+  );
 }
