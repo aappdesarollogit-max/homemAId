@@ -20,6 +20,9 @@ type DashboardPageProps = {
     purchase?: string;
     product?: string;
     prompt?: string;
+    action?: string;
+    mode?: string;
+    settings?: string;
   }>;
 };
 
@@ -110,6 +113,26 @@ function resolvePromptId(promptId?: string) {
   return assistantPrompts.some((prompt) => prompt.id === promptId)
     ? promptId
     : assistantPrompts[0]?.id;
+}
+
+function resolveInventoryAction(action?: string) {
+  return action === "apertura" ? action : undefined;
+}
+
+function resolvePurchaseMode(mode?: string) {
+  return mode === "nueva" ? mode : undefined;
+}
+
+const settingsSections = [
+  { id: "hogar", label: "Hogar" },
+  { id: "integrantes", label: "Integrantes" },
+  { id: "presupuesto", label: "Presupuesto" },
+];
+
+function resolveSettingsSection(section?: string) {
+  return settingsSections.some((item) => item.id === section)
+    ? section
+    : settingsSections[0]?.id;
 }
 
 function AppLogo() {
@@ -277,6 +300,7 @@ function OverviewView() {
     (householdSummary.monthlySpend / householdSummary.monthlyBudget) * 100,
   );
   const urgentProducts = inventoryProducts.filter((product) => product.status !== "ok");
+  const firstUrgentProduct = urgentProducts[0] ?? inventoryProducts[0];
 
   return (
     <>
@@ -340,17 +364,43 @@ function OverviewView() {
           </div>
         </section>
 
-        <section className="rounded-3xl bg-violet-500 p-6 shadow-2xl shadow-violet-950/30">
-          <h2 className="text-2xl font-black">Recomendaciones IA</h2>
-          <div className="mt-5 space-y-4">
-            {aiInsights.map((insight) => (
-              <div key={insight.id} className="rounded-2xl bg-black/20 p-4">
-                <p className="font-black">{insight.title}</p>
-                <p className="mt-1 text-sm leading-relaxed text-violet-50">{insight.description}</p>
-              </div>
-            ))}
-          </div>
-        </section>
+        <div className="space-y-6">
+          <section className="rounded-3xl bg-violet-500 p-6 shadow-2xl shadow-violet-950/30">
+            <h2 className="text-2xl font-black">Recomendaciones IA</h2>
+            <div className="mt-5 space-y-4">
+              {aiInsights.map((insight) => (
+                <div key={insight.id} className="rounded-2xl bg-black/20 p-4">
+                  <p className="font-black">{insight.title}</p>
+                  <p className="mt-1 text-sm leading-relaxed text-violet-50">{insight.description}</p>
+                </div>
+              ))}
+            </div>
+          </section>
+
+          <section className="rounded-3xl border border-white/10 bg-white/[0.04] p-6">
+            <h2 className="text-2xl font-black">Acciones rápidas</h2>
+            <div className="mt-5 grid gap-3">
+              <Link
+                href="/dashboard?view=compras&mode=nueva"
+                className="rounded-2xl bg-white/5 p-4 text-sm font-black hover:bg-white/10"
+              >
+                + Registrar nueva compra
+              </Link>
+              <Link
+                href={`/dashboard?view=inventario&filter=criticos&product=${firstUrgentProduct?.id}&action=apertura`}
+                className="rounded-2xl bg-white/5 p-4 text-sm font-black hover:bg-white/10"
+              >
+                Registrar apertura de producto
+              </Link>
+              <Link
+                href="/dashboard?view=asistente&prompt=stock"
+                className="rounded-2xl bg-white/5 p-4 text-sm font-black hover:bg-white/10"
+              >
+                Consultar productos por agotarse
+              </Link>
+            </div>
+          </section>
+        </div>
       </div>
     </>
   );
@@ -359,9 +409,11 @@ function OverviewView() {
 function InventoryView({
   activeFilter,
   selectedProductId,
+  activeAction,
 }: {
   activeFilter: string;
   selectedProductId?: string;
+  activeAction?: string;
 }) {
   const filteredProducts = filterInventoryProducts(activeFilter);
   const selectedProduct =
@@ -441,18 +493,80 @@ function InventoryView({
             </div>
           </div>
 
-          <button className="mt-6 w-full rounded-2xl bg-violet-500 px-5 py-3 text-sm font-black text-white hover:bg-violet-400">
-            Registrar apertura
-          </button>
+          {activeAction === "apertura" ? (
+            <div className="mt-6 rounded-3xl bg-white p-5 text-slate-950">
+              <p className="text-sm font-black uppercase tracking-[0.16em] text-violet-600">
+                Registrar apertura
+              </p>
+              <p className="mt-2 text-sm text-slate-500">
+                Este formulario visual quedará listo para conectarse a datos reales.
+              </p>
+
+              <div className="mt-5 space-y-4">
+                <div>
+                  <label className="mb-2 block text-xs font-black text-slate-600">
+                    Producto
+                  </label>
+                  <div className="rounded-2xl border border-slate-200 bg-slate-50 px-4 py-3 text-sm font-bold">
+                    {selectedProduct?.name}
+                  </div>
+                </div>
+                <div>
+                  <label className="mb-2 block text-xs font-black text-slate-600">
+                    Cantidad abierta
+                  </label>
+                  <div className="flex items-center justify-between rounded-2xl border border-slate-200 bg-slate-50 px-4 py-3">
+                    <span className="text-xl font-black text-slate-400">−</span>
+                    <span className="text-2xl font-black">1</span>
+                    <span className="text-xl font-black text-violet-600">+</span>
+                  </div>
+                </div>
+                <div>
+                  <label className="mb-2 block text-xs font-black text-slate-600">
+                    Fecha
+                  </label>
+                  <div className="rounded-2xl border border-slate-200 bg-slate-50 px-4 py-3 text-sm font-bold">
+                    Hoy
+                  </div>
+                </div>
+              </div>
+
+              <div className="mt-5 grid grid-cols-2 gap-3">
+                <Link
+                  href={`/dashboard?view=inventario&filter=${activeFilter}&product=${selectedProduct?.id}`}
+                  className="rounded-2xl border border-slate-200 px-4 py-3 text-center text-sm font-black text-slate-700"
+                >
+                  Cancelar
+                </Link>
+                <button className="rounded-2xl bg-violet-500 px-4 py-3 text-sm font-black text-white">
+                  Guardar
+                </button>
+              </div>
+            </div>
+          ) : (
+            <Link
+              href={`/dashboard?view=inventario&filter=${activeFilter}&product=${selectedProduct?.id}&action=apertura`}
+              className="mt-6 block w-full rounded-2xl bg-violet-500 px-5 py-3 text-center text-sm font-black text-white hover:bg-violet-400"
+            >
+              Registrar apertura
+            </Link>
+          )}
         </aside>
       </div>
     </>
   );
 }
 
-function PurchasesView({ selectedPurchaseId }: { selectedPurchaseId?: string }) {
+function PurchasesView({
+  selectedPurchaseId,
+  activeMode,
+}: {
+  selectedPurchaseId?: string;
+  activeMode?: string;
+}) {
   const selectedPurchase =
     purchases.find((purchase) => purchase.id === selectedPurchaseId) ?? purchases[0];
+  const isCreatingPurchase = activeMode === "nueva";
 
   return (
     <>
@@ -461,9 +575,12 @@ function PurchasesView({ selectedPurchaseId }: { selectedPurchaseId?: string }) 
         title="Registro de compras"
         description="Historial de compras recientes y productos que luego alimentarán el inventario."
         action={
-          <button className="rounded-2xl bg-violet-500 px-5 py-3 text-sm font-black text-white">
+          <Link
+            href="/dashboard?view=compras&mode=nueva"
+            className="rounded-2xl bg-violet-500 px-5 py-3 text-sm font-black text-white"
+          >
             + Nueva compra
-          </button>
+          </Link>
         }
       />
 
@@ -497,34 +614,89 @@ function PurchasesView({ selectedPurchaseId }: { selectedPurchaseId?: string }) 
           })}
         </div>
 
-        <aside className="rounded-3xl border border-white/10 bg-white/[0.04] p-6">
-          <p className="text-sm font-black uppercase tracking-[0.18em] text-violet-300">
-            Detalle
-          </p>
-          <h2 className="mt-3 text-2xl font-black">{selectedPurchase?.store}</h2>
-          <p className="mt-1 text-sm text-white/50">{selectedPurchase?.date}</p>
+        {isCreatingPurchase ? (
+          <aside className="rounded-3xl bg-white p-6 text-slate-950">
+            <p className="text-sm font-black uppercase tracking-[0.18em] text-violet-600">
+              Nueva compra
+            </p>
+            <h2 className="mt-3 text-2xl font-black">Registrar compra</h2>
+            <p className="mt-2 text-sm leading-relaxed text-slate-500">
+              Formulario visual preparado para conectar validación y persistencia.
+            </p>
 
-          <div className="mt-6 space-y-3">
-            {selectedPurchase?.items.map((item) => (
-              <div key={item.productName} className="rounded-2xl bg-white/5 p-4">
-                <div className="flex items-start justify-between gap-4">
-                  <div>
-                    <p className="font-bold">{item.productName}</p>
-                    <p className="mt-1 text-sm text-white/50">{item.quantity}</p>
-                  </div>
-                  <p className="font-black">{formatCurrency(item.price)}</p>
+            <div className="mt-6 space-y-4">
+              <div>
+                <label className="mb-2 block text-xs font-black text-slate-600">
+                  Tienda
+                </label>
+                <div className="rounded-2xl border border-slate-200 bg-slate-50 px-4 py-3 text-sm font-bold">
+                  Supermercado
                 </div>
               </div>
-            ))}
-          </div>
+              <div>
+                <label className="mb-2 block text-xs font-black text-slate-600">
+                  Productos
+                </label>
+                <div className="space-y-3">
+                  <div className="rounded-2xl border border-slate-200 bg-slate-50 p-4">
+                    <p className="font-black">Leche entera</p>
+                    <p className="mt-1 text-sm text-slate-500">2 unidades · $3.000</p>
+                  </div>
+                  <div className="rounded-2xl border border-slate-200 bg-slate-50 p-4">
+                    <p className="font-black">Detergente</p>
+                    <p className="mt-1 text-sm text-slate-500">1 unidad · $4.990</p>
+                  </div>
+                </div>
+              </div>
+            </div>
 
-          <div className="mt-6 flex items-center justify-between border-t border-white/10 pt-5">
-            <span className="text-sm font-bold text-white/55">Total</span>
-            <span className="text-2xl font-black text-violet-300">
-              {formatCurrency(selectedPurchase?.total ?? 0)}
-            </span>
-          </div>
-        </aside>
+            <div className="mt-6 flex items-center justify-between border-t border-slate-200 pt-5">
+              <span className="text-sm font-bold text-slate-500">Total</span>
+              <span className="text-2xl font-black text-violet-600">{formatCurrency(7990)}</span>
+            </div>
+
+            <div className="mt-5 grid grid-cols-2 gap-3">
+              <Link
+                href="/dashboard?view=compras"
+                className="rounded-2xl border border-slate-200 px-4 py-3 text-center text-sm font-black text-slate-700"
+              >
+                Cancelar
+              </Link>
+              <button className="rounded-2xl bg-violet-500 px-4 py-3 text-sm font-black text-white">
+                Guardar
+              </button>
+            </div>
+          </aside>
+        ) : (
+          <aside className="rounded-3xl border border-white/10 bg-white/[0.04] p-6">
+            <p className="text-sm font-black uppercase tracking-[0.18em] text-violet-300">
+              Detalle
+            </p>
+            <h2 className="mt-3 text-2xl font-black">{selectedPurchase?.store}</h2>
+            <p className="mt-1 text-sm text-white/50">{selectedPurchase?.date}</p>
+
+            <div className="mt-6 space-y-3">
+              {selectedPurchase?.items.map((item) => (
+                <div key={item.productName} className="rounded-2xl bg-white/5 p-4">
+                  <div className="flex items-start justify-between gap-4">
+                    <div>
+                      <p className="font-bold">{item.productName}</p>
+                      <p className="mt-1 text-sm text-white/50">{item.quantity}</p>
+                    </div>
+                    <p className="font-black">{formatCurrency(item.price)}</p>
+                  </div>
+                </div>
+              ))}
+            </div>
+
+            <div className="mt-6 flex items-center justify-between border-t border-white/10 pt-5">
+              <span className="text-sm font-bold text-white/55">Total</span>
+              <span className="text-2xl font-black text-violet-300">
+                {formatCurrency(selectedPurchase?.total ?? 0)}
+              </span>
+            </div>
+          </aside>
+        )}
       </div>
     </>
   );
@@ -656,7 +828,7 @@ function AssistantView({ selectedPromptId }: { selectedPromptId?: string }) {
   );
 }
 
-function SettingsView() {
+function SettingsView({ activeSettingsSection }: { activeSettingsSection?: string }) {
   return (
     <>
       <SectionHeader
@@ -664,6 +836,16 @@ function SettingsView() {
         title="Configuración del hogar"
         description="Base para gestionar hogar, integrantes, presupuesto y preferencias."
       />
+
+      <div className="mb-6 flex flex-wrap gap-2">
+        {settingsSections.map((section) => (
+          <Link key={section.id} href={`/dashboard?view=ajustes&settings=${section.id}`}>
+            <Badge tone={activeSettingsSection === section.id ? "violet" : "slate"}>
+              {section.label}
+            </Badge>
+          </Link>
+        ))}
+      </div>
 
       <div className="grid gap-6 lg:grid-cols-[380px_1fr]">
         <section className="rounded-3xl border border-white/10 bg-white/[0.04] p-6">
@@ -676,20 +858,60 @@ function SettingsView() {
         </section>
 
         <section className="rounded-3xl border border-white/10 bg-white/[0.04] p-6">
-          <h2 className="text-2xl font-black">Integrantes</h2>
-          <div className="mt-5 grid gap-3 sm:grid-cols-2">
-            {householdMembers.map((member) => (
-              <div key={member.id} className="flex items-center gap-4 rounded-2xl bg-white/5 p-4">
-                <span className="flex h-12 w-12 items-center justify-center rounded-full bg-violet-500 font-black">
-                  {member.avatar}
-                </span>
-                <div>
-                  <p className="font-black">{member.name}</p>
-                  <p className="text-sm text-white/50">{member.role}</p>
-                </div>
+          {activeSettingsSection === "integrantes" ? (
+            <>
+              <h2 className="text-2xl font-black">Integrantes</h2>
+              <div className="mt-5 grid gap-3 sm:grid-cols-2">
+                {householdMembers.map((member) => (
+                  <div key={member.id} className="flex items-center gap-4 rounded-2xl bg-white/5 p-4">
+                    <span className="flex h-12 w-12 items-center justify-center rounded-full bg-violet-500 font-black">
+                      {member.avatar}
+                    </span>
+                    <div>
+                      <p className="font-black">{member.name}</p>
+                      <p className="text-sm text-white/50">{member.role}</p>
+                    </div>
+                  </div>
+                ))}
               </div>
-            ))}
-          </div>
+            </>
+          ) : activeSettingsSection === "presupuesto" ? (
+            <>
+              <h2 className="text-2xl font-black">Presupuesto</h2>
+              <p className="mt-2 text-sm text-white/55">
+                Control mensual base para medir gasto y ahorro.
+              </p>
+              <div className="mt-6 rounded-3xl bg-white p-6 text-slate-950">
+                <p className="text-sm font-bold text-slate-500">Presupuesto mensual</p>
+                <p className="mt-2 text-4xl font-black text-violet-600">
+                  {formatCurrency(householdSummary.monthlyBudget)}
+                </p>
+                <div className="mt-6 h-3 rounded-full bg-slate-100">
+                  <div className="h-full w-[72%] rounded-full bg-violet-500" />
+                </div>
+                <p className="mt-3 text-sm font-bold text-slate-500">
+                  {formatCurrency(householdSummary.monthlySpend)} gastados este mes
+                </p>
+              </div>
+            </>
+          ) : (
+            <>
+              <h2 className="text-2xl font-black">Información del hogar</h2>
+              <div className="mt-5 space-y-3">
+                {[
+                  ["Nombre", householdSummary.name],
+                  ["Responsable", householdSummary.owner],
+                  ["Score del hogar", `${householdSummary.healthScore}/100`],
+                  ["Ahorro estimado", formatCurrency(householdSummary.estimatedSavings)],
+                ].map(([label, value]) => (
+                  <div key={label} className="flex items-center justify-between rounded-2xl bg-white/5 p-4">
+                    <span className="text-sm font-bold text-white/55">{label}</span>
+                    <span className="font-black">{value}</span>
+                  </div>
+                ))}
+              </div>
+            </>
+          )}
         </section>
       </div>
     </>
@@ -702,19 +924,32 @@ function renderView(
   selectedPurchaseId?: string,
   selectedProductId?: string,
   selectedPromptId?: string,
+  activeAction?: string,
+  activeMode?: string,
+  activeSettingsSection?: string,
 ) {
   if (view === "inventario") {
     return (
       <InventoryView
         activeFilter={activeFilter}
         selectedProductId={selectedProductId}
+        activeAction={activeAction}
       />
     );
   }
-  if (view === "compras") return <PurchasesView selectedPurchaseId={selectedPurchaseId} />;
+  if (view === "compras") {
+    return (
+      <PurchasesView
+        selectedPurchaseId={selectedPurchaseId}
+        activeMode={activeMode}
+      />
+    );
+  }
   if (view === "consumo") return <ConsumptionView />;
   if (view === "asistente") return <AssistantView selectedPromptId={selectedPromptId} />;
-  if (view === "ajustes") return <SettingsView />;
+  if (view === "ajustes") {
+    return <SettingsView activeSettingsSection={activeSettingsSection} />;
+  }
   return <OverviewView />;
 }
 
@@ -725,6 +960,9 @@ export default async function DashboardPage({ searchParams }: DashboardPageProps
   const selectedPurchaseId = resolvePurchaseId(params?.purchase);
   const selectedProductId = resolveProductId(params?.product);
   const selectedPromptId = resolvePromptId(params?.prompt);
+  const activeAction = resolveInventoryAction(params?.action);
+  const activeMode = resolvePurchaseMode(params?.mode);
+  const activeSettingsSection = resolveSettingsSection(params?.settings);
 
   return (
     <DashboardShell activeView={activeView}>
@@ -734,6 +972,9 @@ export default async function DashboardPage({ searchParams }: DashboardPageProps
         selectedPurchaseId,
         selectedProductId,
         selectedPromptId,
+        activeAction,
+        activeMode,
+        activeSettingsSection,
       )}
     </DashboardShell>
   );
