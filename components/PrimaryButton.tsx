@@ -3,13 +3,18 @@ import Link from "next/link";
 type PrimaryButtonProps = {
   text: string;
   href?: string;
+  className?: string;
 };
 
-export default function PrimaryButton({ text, href = "/registro" }: PrimaryButtonProps) {
+export default function PrimaryButton({
+  text,
+  href = "/registro",
+  className = "",
+}: PrimaryButtonProps) {
   return (
     <Link
       href={href}
-      className="bg-orange-500 hover:bg-orange-600 text-white font-semibold px-6 py-3 rounded-xl transition text-center"
+      className={`rounded-xl bg-orange-500 px-6 py-3 text-center font-semibold text-white transition hover:bg-orange-600 ${className}`}
     >
       {text}
     </Link>

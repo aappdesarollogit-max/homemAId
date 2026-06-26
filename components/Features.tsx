@@ -1,45 +1,8 @@
-const features = [
-  {
-    icon: "✅",
-    title: "Tareas del hogar",
-    description:
-      "Crea, ordena y prioriza pendientes como limpieza, compras, pagos o mantenciones.",
-  },
-  {
-    icon: "🔔",
-    title: "Recordatorios inteligentes",
-    description:
-      "Recibe alertas para no olvidar cuentas, compras importantes o rutinas familiares.",
-  },
-  {
-    icon: "🛒",
-    title: "Lista de compras",
-    description:
-      "Organiza productos pendientes y deja que la IA sugiera lo que podrías necesitar.",
-  },
-  {
-    icon: "📅",
-    title: "Agenda familiar",
-    description:
-      "Centraliza actividades, responsabilidades y fechas importantes del hogar.",
-  },
-  {
-    icon: "🤖",
-    title: "Asistente IA",
-    description:
-      "Pide ayuda para planificar la semana, ordenar tareas o crear listas automáticamente.",
-  },
-  {
-    icon: "🏠",
-    title: "Panel del hogar",
-    description:
-      "Visualiza en una sola pantalla todo lo importante para mantener tu casa organizada.",
-  },
-];
+import { features } from "@/data/home";
 
 export default function Features() {
   return (
-    <section className="mt-20 w-full max-w-6xl">
+    <section id="funciones" className="mt-20 w-full max-w-6xl scroll-mt-24">
       <div className="text-center mb-12">
         <p className="text-orange-400 font-semibold mb-2">
           Funciones principales
@@ -54,7 +17,7 @@ export default function Features() {
         {features.map((feature) => (
           <article
             key={feature.title}
-            className="bg-slate-900 border border-slate-800 rounded-3xl p-8 hover:border-orange-400 transition"
+            className="rounded-2xl border border-slate-800 bg-slate-900 p-8 transition hover:border-orange-400"
           >
             <div className="text-4xl mb-4">
               {feature.icon}
