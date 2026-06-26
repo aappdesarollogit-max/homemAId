@@ -9,24 +9,28 @@ export default function Hero() {
         </p>
 
         <h1 className="text-4xl md:text-6xl font-bold leading-tight mb-6">
-          Tu asistente inteligente para organizar el hogar
+          Tu asistente inteligente para administrar compras, consumo y ahorro
+          familiar
         </h1>
 
         <p className="text-slate-300 text-lg mb-8">
-          Centraliza tareas, recordatorios, compras, rutinas y pendientes del hogar
-          con ayuda de inteligencia artificial.
+          Registra compras, controla tu inventario, predice consumo y descubre
+          oportunidades de ahorro usando inteligencia artificial.
         </p>
 
         <div className="flex flex-col sm:flex-row gap-4">
           <PrimaryButton text="Comenzar" href="/registro" />
 
-          <button className="border border-slate-700 hover:border-orange-400 text-white font-semibold px-6 py-3 rounded-xl transition">
+          <a
+            href="#funciones"
+            className="rounded-xl border border-slate-700 px-6 py-3 text-center font-semibold text-white transition hover:border-orange-400"
+          >
             Ver funciones
-          </button>
+          </a>
         </div>
       </div>
 
-      <div className="bg-slate-900 border border-slate-800 rounded-3xl p-6 shadow-2xl">
+      <div className="rounded-2xl border border-slate-800 bg-slate-900 p-6 shadow-2xl">
         <div className="bg-slate-950 rounded-2xl p-5">
           <p className="text-sm text-slate-400 mb-4">
             Panel del hogar

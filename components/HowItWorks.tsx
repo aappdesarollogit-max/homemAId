@@ -1,27 +1,8 @@
-const steps = [
-  {
-    step: "01",
-    title: "Configura tu hogar",
-    description:
-      "Define integrantes, rutinas, tareas frecuentes y preferencias familiares.",
-  },
-  {
-    step: "02",
-    title: "Organiza con IA",
-    description:
-      "La inteligencia artificial te ayuda a crear listas, recordatorios y planes semanales.",
-  },
-  {
-    step: "03",
-    title: "Mantén el control",
-    description:
-      "Visualiza tareas, pendientes y actividades desde un único panel.",
-  },
-];
+import { howItWorksSteps } from "@/data/home";
 
 export default function HowItWorks() {
   return (
-    <section className="mt-24 w-full max-w-6xl">
+    <section id="como-funciona" className="mt-24 w-full max-w-6xl scroll-mt-24">
       <div className="text-center mb-12">
         <p className="text-orange-400 font-semibold mb-2">
           Cómo funciona
@@ -33,10 +14,10 @@ export default function HowItWorks() {
       </div>
 
       <div className="grid gap-6 md:grid-cols-3">
-        {steps.map((step) => (
+        {howItWorksSteps.map((step) => (
           <article
             key={step.step}
-            className="bg-slate-900 border border-slate-800 rounded-3xl p-8 text-center"
+            className="rounded-2xl border border-slate-800 bg-slate-900 p-8 text-center"
           >
             <div className="w-14 h-14 mx-auto mb-6 rounded-full bg-orange-500 flex items-center justify-center font-bold text-xl">
               {step.step}

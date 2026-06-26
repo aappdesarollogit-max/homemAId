@@ -4,13 +4,13 @@ export default function Navbar() {
   return (
     <header className="w-full border-b border-slate-800 bg-slate-950/90 backdrop-blur">
       <nav className="max-w-6xl mx-auto flex items-center justify-between px-6 py-4">
-        <Link href="/" className="flex items-center gap-2">
+        <Link href="/" className="flex items-center gap-2" aria-label="Ir al inicio">
           <div className="w-9 h-9 rounded-xl bg-orange-500 flex items-center justify-center font-bold">
             H
           </div>
 
           <span className="font-bold text-xl">
-            HomeMade IA
+            HomeMaid
           </span>
         </Link>
 
