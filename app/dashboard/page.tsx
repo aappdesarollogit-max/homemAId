@@ -17,6 +17,7 @@ type DashboardPageProps = {
   searchParams?: Promise<{
     view?: string;
     filter?: string;
+    purchase?: string;
   }>;
 };
 
@@ -63,6 +64,12 @@ function filterInventoryProducts(filter: string) {
   }
 
   return inventoryProducts;
+}
+
+function resolvePurchaseId(purchaseId?: string) {
+  return purchases.some((purchase) => purchase.id === purchaseId)
+    ? purchaseId
+    : purchases[0]?.id;
 }
 
 function AppLogo() {
@@ -305,7 +312,10 @@ function InventoryView({ activeFilter }: { activeFilter: string }) {
   );
 }
 
-function PurchasesView() {
+function PurchasesView({ selectedPurchaseId }: { selectedPurchaseId?: string }) {
+  const selectedPurchase =
+    purchases.find((purchase) => purchase.id === selectedPurchaseId) ?? purchases[0];
+
   return (
     <>
       <SectionHeader
@@ -319,28 +329,64 @@ function PurchasesView() {
         }
       />
 
-      <div className="grid gap-5 lg:grid-cols-3">
-        {purchases.map((purchase) => (
-          <article key={purchase.id} className="rounded-3xl border border-white/10 bg-white/[0.04] p-6">
-            <div className="flex items-start justify-between gap-4">
-              <div>
-                <p className="text-xl font-black">{purchase.store}</p>
-                <p className="mt-1 text-sm text-white/50">{purchase.date}</p>
-              </div>
-              <p className="font-black text-violet-300">{formatCurrency(purchase.total)}</p>
-            </div>
-            <div className="mt-5 space-y-3">
-              {purchase.items.map((item) => (
-                <div key={item.productName} className="rounded-2xl bg-white/5 p-4">
-                  <p className="font-bold">{item.productName}</p>
-                  <p className="mt-1 text-sm text-white/50">
-                    {item.quantity} · {formatCurrency(item.price)}
-                  </p>
+      <div className="grid gap-6 xl:grid-cols-[1fr_380px]">
+        <div className="grid gap-5 lg:grid-cols-2">
+          {purchases.map((purchase) => {
+            const isSelected = purchase.id === selectedPurchase?.id;
+
+            return (
+              <Link
+                key={purchase.id}
+                href={`/dashboard?view=compras&purchase=${purchase.id}`}
+                className={`rounded-3xl border p-6 transition ${
+                  isSelected
+                    ? "border-violet-400 bg-violet-500/20"
+                    : "border-white/10 bg-white/[0.04] hover:bg-white/[0.07]"
+                }`}
+              >
+                <div className="flex items-start justify-between gap-4">
+                  <div>
+                    <p className="text-xl font-black">{purchase.store}</p>
+                    <p className="mt-1 text-sm text-white/50">{purchase.date}</p>
+                  </div>
+                  <p className="font-black text-violet-300">{formatCurrency(purchase.total)}</p>
                 </div>
-              ))}
-            </div>
-          </article>
-        ))}
+                <p className="mt-5 text-sm font-semibold text-white/55">
+                  {purchase.items.length} producto{purchase.items.length === 1 ? "" : "s"} registrado
+                </p>
+              </Link>
+            );
+          })}
+        </div>
+
+        <aside className="rounded-3xl border border-white/10 bg-white/[0.04] p-6">
+          <p className="text-sm font-black uppercase tracking-[0.18em] text-violet-300">
+            Detalle
+          </p>
+          <h2 className="mt-3 text-2xl font-black">{selectedPurchase?.store}</h2>
+          <p className="mt-1 text-sm text-white/50">{selectedPurchase?.date}</p>
+
+          <div className="mt-6 space-y-3">
+            {selectedPurchase?.items.map((item) => (
+              <div key={item.productName} className="rounded-2xl bg-white/5 p-4">
+                <div className="flex items-start justify-between gap-4">
+                  <div>
+                    <p className="font-bold">{item.productName}</p>
+                    <p className="mt-1 text-sm text-white/50">{item.quantity}</p>
+                  </div>
+                  <p className="font-black">{formatCurrency(item.price)}</p>
+                </div>
+              </div>
+            ))}
+          </div>
+
+          <div className="mt-6 flex items-center justify-between border-t border-white/10 pt-5">
+            <span className="text-sm font-bold text-white/55">Total</span>
+            <span className="text-2xl font-black text-violet-300">
+              {formatCurrency(selectedPurchase?.total ?? 0)}
+            </span>
+          </div>
+        </aside>
       </div>
     </>
   );
@@ -498,9 +544,13 @@ function SettingsView() {
   );
 }
 
-function renderView(view: DashboardView, activeFilter: string) {
+function renderView(
+  view: DashboardView,
+  activeFilter: string,
+  selectedPurchaseId?: string,
+) {
   if (view === "inventario") return <InventoryView activeFilter={activeFilter} />;
-  if (view === "compras") return <PurchasesView />;
+  if (view === "compras") return <PurchasesView selectedPurchaseId={selectedPurchaseId} />;
   if (view === "consumo") return <ConsumptionView />;
   if (view === "asistente") return <AssistantView />;
   if (view === "ajustes") return <SettingsView />;
@@ -511,10 +561,11 @@ export default async function DashboardPage({ searchParams }: DashboardPageProps
   const params = await searchParams;
   const activeView = resolveView(params?.view);
   const activeFilter = resolveInventoryFilter(params?.filter);
+  const selectedPurchaseId = resolvePurchaseId(params?.purchase);
 
   return (
     <DashboardShell activeView={activeView}>
-      {renderView(activeView, activeFilter)}
+      {renderView(activeView, activeFilter, selectedPurchaseId)}
     </DashboardShell>
   );
 }
