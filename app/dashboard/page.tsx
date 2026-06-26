@@ -19,6 +19,7 @@ type DashboardPageProps = {
     filter?: string;
     purchase?: string;
     product?: string;
+    prompt?: string;
   }>;
 };
 
@@ -77,6 +78,38 @@ function resolveProductId(productId?: string) {
   return inventoryProducts.some((product) => product.id === productId)
     ? productId
     : inventoryProducts[0]?.id;
+}
+
+const assistantPrompts = [
+  {
+    id: "stock",
+    question: "¿Qué productos están por agotarse?",
+    answer:
+      "Tienes 3 productos que requieren atención: leche entera, huevos y papel higiénico. Recomiendo agregarlos a la próxima compra.",
+  },
+  {
+    id: "purchase",
+    question: "Registra una compra de supermercado",
+    answer:
+      "Puedes escribir una compra en lenguaje natural. Por ejemplo: “Compré 2 leches y un detergente”. HomeMaid la convertirá en productos del inventario.",
+  },
+  {
+    id: "spend",
+    question: "¿Cuánto gasté este mes?",
+    answer: `Este mes llevas ${formatCurrency(householdSummary.monthlySpend)}, equivalente al 72% de tu presupuesto mensual.`,
+  },
+  {
+    id: "weekly-list",
+    question: "Sugiere una lista para la semana",
+    answer:
+      "Para esta semana sugiero comprar leche, huevos, papel higiénico, pan integral y frutas. La lista prioriza productos por agotarse.",
+  },
+];
+
+function resolvePromptId(promptId?: string) {
+  return assistantPrompts.some((prompt) => prompt.id === promptId)
+    ? promptId
+    : assistantPrompts[0]?.id;
 }
 
 function AppLogo() {
@@ -557,7 +590,11 @@ function ConsumptionView() {
   );
 }
 
-function AssistantView() {
+function AssistantView({ selectedPromptId }: { selectedPromptId?: string }) {
+  const selectedPrompt =
+    assistantPrompts.find((prompt) => prompt.id === selectedPromptId) ??
+    assistantPrompts[0];
+
   return (
     <>
       <SectionHeader
@@ -580,6 +617,16 @@ function AssistantView() {
                 Listo. Registré la compra por {formatCurrency(7990)} y actualicé el inventario.
               </p>
             </div>
+            {selectedPrompt ? (
+              <>
+                <div className="ml-auto max-w-md rounded-3xl bg-violet-500 p-4">
+                  <p className="text-sm font-bold">{selectedPrompt.question}</p>
+                </div>
+                <div className="max-w-md rounded-3xl bg-white p-4 text-slate-950">
+                  <p className="text-sm font-bold">{selectedPrompt.answer}</p>
+                </div>
+              </>
+            ) : null}
           </div>
           <div className="mt-8 rounded-2xl bg-white px-4 py-4 text-sm text-slate-400">
             Escribe un mensaje...
@@ -589,18 +636,18 @@ function AssistantView() {
         <section className="rounded-3xl border border-white/10 bg-white/[0.04] p-6">
           <h2 className="text-2xl font-black">Sugerencias rápidas</h2>
           <div className="mt-5 space-y-3">
-            {[
-              "¿Qué productos están por agotarse?",
-              "Registra una compra de supermercado",
-              "¿Cuánto gasté este mes?",
-              "Sugiere una lista para la semana",
-            ].map((prompt) => (
-              <button
-                key={prompt}
-                className="w-full rounded-2xl bg-white/5 p-4 text-left text-sm font-bold hover:bg-white/10"
+            {assistantPrompts.map((prompt) => (
+              <Link
+                key={prompt.id}
+                href={`/dashboard?view=asistente&prompt=${prompt.id}`}
+                className={`block w-full rounded-2xl p-4 text-left text-sm font-bold transition ${
+                  prompt.id === selectedPrompt?.id
+                    ? "bg-violet-500 text-white"
+                    : "bg-white/5 hover:bg-white/10"
+                }`}
               >
-                {prompt}
-              </button>
+                {prompt.question}
+              </Link>
             ))}
           </div>
         </section>
@@ -654,6 +701,7 @@ function renderView(
   activeFilter: string,
   selectedPurchaseId?: string,
   selectedProductId?: string,
+  selectedPromptId?: string,
 ) {
   if (view === "inventario") {
     return (
@@ -665,7 +713,7 @@ function renderView(
   }
   if (view === "compras") return <PurchasesView selectedPurchaseId={selectedPurchaseId} />;
   if (view === "consumo") return <ConsumptionView />;
-  if (view === "asistente") return <AssistantView />;
+  if (view === "asistente") return <AssistantView selectedPromptId={selectedPromptId} />;
   if (view === "ajustes") return <SettingsView />;
   return <OverviewView />;
 }
@@ -676,10 +724,17 @@ export default async function DashboardPage({ searchParams }: DashboardPageProps
   const activeFilter = resolveInventoryFilter(params?.filter);
   const selectedPurchaseId = resolvePurchaseId(params?.purchase);
   const selectedProductId = resolveProductId(params?.product);
+  const selectedPromptId = resolvePromptId(params?.prompt);
 
   return (
     <DashboardShell activeView={activeView}>
-      {renderView(activeView, activeFilter, selectedPurchaseId, selectedProductId)}
+      {renderView(
+        activeView,
+        activeFilter,
+        selectedPurchaseId,
+        selectedProductId,
+        selectedPromptId,
+      )}
     </DashboardShell>
   );
 }
