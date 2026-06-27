@@ -28,7 +28,7 @@ export default function AssistantView({ selectedPromptId }: { selectedPromptId?:
       />
 
       <div className="grid gap-6 lg:grid-cols-[1fr_420px]">
-        <section className="rounded-3xl border border-white/10 bg-white/[0.04] p-6">
+        <section className="flex h-[calc(100vh-220px)] min-h-[480px] max-h-[720px] flex-col rounded-3xl border border-white/10 bg-white/[0.04] p-6">
           <AssistantChat messages={messages} isLoaded={isLoaded} />
           <AssistantInput value={inputValue} onChange={setInputValue} onSend={sendMessage} />
         </section>

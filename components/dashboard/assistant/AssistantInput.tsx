@@ -17,7 +17,7 @@ export default function AssistantInput({
   }
 
   return (
-    <form onSubmit={handleSubmit} className="mt-8 flex gap-3">
+    <form onSubmit={handleSubmit} className="mt-6 flex shrink-0 gap-3">
       <input
         value={value}
         onChange={(event) => onChange(event.target.value)}
