@@ -4,6 +4,7 @@ import Link from "next/link";
 import MetricCard from "@/components/dashboard/MetricCard";
 import { InventoryRow } from "@/components/dashboard/InventoryRows";
 import SectionHeader from "@/components/dashboard/SectionHeader";
+import { useInventory } from "@/hooks/useInventory";
 import { usePurchases } from "@/hooks/usePurchases";
 import {
   aiInsights,
@@ -14,12 +15,14 @@ import {
 
 export default function OverviewView() {
   const { monthlySpend, isLoaded } = usePurchases();
+  const { products, isLoaded: isInventoryLoaded } = useInventory("todos");
   const currentMonthlySpend = isLoaded ? monthlySpend : householdSummary.monthlySpend;
+  const currentInventoryProducts = isInventoryLoaded ? products : inventoryProducts;
   const budgetUsage = Math.round(
     (currentMonthlySpend / householdSummary.monthlyBudget) * 100,
   );
-  const urgentProducts = inventoryProducts.filter((product) => product.status !== "ok");
-  const firstUrgentProduct = urgentProducts[0] ?? inventoryProducts[0];
+  const urgentProducts = currentInventoryProducts.filter((product) => product.status !== "ok");
+  const firstUrgentProduct = urgentProducts[0] ?? currentInventoryProducts[0];
 
   return (
     <>
@@ -41,7 +44,7 @@ export default function OverviewView() {
         <MetricCard
           icon="▤"
           label="Productos"
-          value={String(inventoryProducts.length)}
+          value={String(currentInventoryProducts.length)}
           note="Total en inventario"
           tone="violet"
         />
