@@ -47,6 +47,26 @@ export const assistantPrompts = [
     answer:
       "Para esta semana sugiero comprar leche, huevos, papel higiénico, pan integral y frutas. La lista prioriza productos por agotarse.",
   },
+  {
+    id: "top-products",
+    question: "Productos mas comprados",
+    answer: "Te mostrare los productos mas comprados desde tu historial.",
+  },
+  {
+    id: "top-store",
+    question: "Tienda con mayor gasto",
+    answer: "Te mostrare la tienda con mayor gasto registrado.",
+  },
+  {
+    id: "alerts",
+    question: "Alertas del hogar",
+    answer: "Revisare presupuesto, inventario critico y patrones de compra.",
+  },
+  {
+    id: "home-summary",
+    question: "Resumen del hogar",
+    answer: "Preparare un resumen con inventario, compras y consumo.",
+  },
 ];
 
 export const settingsSections = [

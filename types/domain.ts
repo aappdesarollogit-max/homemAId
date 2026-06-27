@@ -62,3 +62,48 @@ export type HouseholdSummary = {
   estimatedSavings: number;
   healthScore: number;
 };
+
+export type AssistantMessage = {
+  id: string;
+  role: "user" | "assistant";
+  content: string;
+  createdAt: string;
+};
+
+export type AssistantIntent =
+  | "critical_products"
+  | "monthly_spend"
+  | "shopping_recommendation"
+  | "top_products"
+  | "top_store"
+  | "budget_alert"
+  | "home_summary"
+  | "help"
+  | "unknown";
+
+export type AssistantContext = {
+  inventoryProducts: InventoryProduct[];
+  purchases: Purchase[];
+  consumptionMetrics: {
+    monthlySpend: number;
+    budgetUsage: number;
+    criticalProducts: InventoryProduct[];
+    topProducts: Array<{
+      productName: string;
+      quantity: number;
+      unit: string;
+      totalSpend: number;
+    }>;
+    spendByStore: Array<{
+      label: string;
+      amount: number;
+      percentage: number;
+    }>;
+    alerts: Array<{
+      id: string;
+      title: string;
+      description: string;
+      tone: "warning" | "danger" | "info";
+    }>;
+  };
+};

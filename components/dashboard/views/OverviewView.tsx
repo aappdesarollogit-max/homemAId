@@ -7,7 +7,6 @@ import SectionHeader from "@/components/dashboard/SectionHeader";
 import { useInventory } from "@/hooks/useInventory";
 import { usePurchases } from "@/hooks/usePurchases";
 import {
-  aiInsights,
   formatCurrency,
   householdSummary,
   inventoryProducts,
@@ -23,6 +22,27 @@ export default function OverviewView() {
   );
   const urgentProducts = currentInventoryProducts.filter((product) => product.status !== "ok");
   const firstUrgentProduct = urgentProducts[0] ?? currentInventoryProducts[0];
+  const aiInsights = [
+    urgentProducts.length > 0
+      ? {
+          id: "critical-products",
+          title: `${urgentProducts.length} producto${urgentProducts.length === 1 ? "" : "s"} por revisar`,
+          description: `Prioriza ${urgentProducts
+            .slice(0, 3)
+            .map((product) => product.name)
+            .join(", ")} en tu próxima compra.`,
+        }
+      : {
+          id: "inventory-ok",
+          title: "Inventario en buen estado",
+          description: "No hay productos críticos ni con stock bajo en este momento.",
+        },
+    {
+      id: "monthly-spend",
+      title: `Gasto mensual al ${budgetUsage}%`,
+      description: `Este mes llevas ${formatCurrency(currentMonthlySpend)} registrados en compras.`,
+    },
+  ];
 
   return (
     <>
