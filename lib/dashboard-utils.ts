@@ -84,9 +84,7 @@ export function filterInventoryProducts(filter: string) {
 }
 
 export function resolvePurchaseId(purchaseId?: string) {
-  return purchases.some((purchase) => purchase.id === purchaseId)
-    ? purchaseId
-    : purchases[0]?.id;
+  return purchaseId ?? purchases[0]?.id;
 }
 
 export function resolveProductId(productId?: string) {

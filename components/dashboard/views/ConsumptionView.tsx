@@ -1,9 +1,14 @@
+"use client";
+
 import SectionHeader from "@/components/dashboard/SectionHeader";
+import { usePurchases } from "@/hooks/usePurchases";
 import { formatCurrency, householdSummary } from "@/lib/mock-home";
 
 export default function ConsumptionView() {
+  const { monthlySpend, isLoaded } = usePurchases();
+  const currentMonthlySpend = isLoaded ? monthlySpend : householdSummary.monthlySpend;
   const budgetUsage = Math.round(
-    (householdSummary.monthlySpend / householdSummary.monthlyBudget) * 100,
+    (currentMonthlySpend / householdSummary.monthlyBudget) * 100,
   );
 
   return (
@@ -17,7 +22,7 @@ export default function ConsumptionView() {
       <div className="grid gap-6 lg:grid-cols-[1fr_380px]">
         <section className="rounded-3xl border border-white/10 bg-white/[0.04] p-6">
           <p className="text-sm font-bold text-white/55">Gasto del mes</p>
-          <p className="mt-2 text-4xl font-black">{formatCurrency(householdSummary.monthlySpend)}</p>
+          <p className="mt-2 text-4xl font-black">{formatCurrency(currentMonthlySpend)}</p>
           <p className="mt-2 text-sm font-bold text-red-300">
             {budgetUsage}% del presupuesto mensual
           </p>

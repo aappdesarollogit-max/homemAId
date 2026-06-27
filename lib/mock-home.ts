@@ -117,8 +117,8 @@ export const purchases: Purchase[] = [
     date: "Hoy",
     total: 7990,
     items: [
-      { productName: "Leche entera", quantity: "2 unidades", price: 3000 },
-      { productName: "Detergente", quantity: "1 unidad", price: 4990 },
+      { productId: "milk", productName: "Leche entera", quantity: 2, unit: "unidades", price: 3000 },
+      { productId: "detergent", productName: "Detergente", quantity: 1, unit: "unidad", price: 4990 },
     ],
   },
   {
@@ -126,14 +126,14 @@ export const purchases: Purchase[] = [
     store: "Panadería",
     date: "Ayer",
     total: 1890,
-    items: [{ productName: "Pan integral", quantity: "1 bolsa", price: 1890 }],
+    items: [{ productName: "Pan integral", quantity: 1, unit: "bolsa", price: 1890 }],
   },
   {
     id: "purchase-3",
     store: "Mascotas",
     date: "Hace 3 días",
     total: 12990,
-    items: [{ productName: "Alimento Luna", quantity: "1 bolsa", price: 12990 }],
+    items: [{ productName: "Alimento Luna", quantity: 1, unit: "bolsa", price: 12990 }],
   },
 ];
 

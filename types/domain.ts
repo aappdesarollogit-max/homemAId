@@ -32,8 +32,10 @@ export type InventoryProduct = {
 };
 
 export type PurchaseItem = {
+  productId?: string;
   productName: string;
-  quantity: string;
+  quantity: number;
+  unit: string;
   price: number;
 };
 

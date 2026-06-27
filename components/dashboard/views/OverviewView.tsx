@@ -1,7 +1,10 @@
+"use client";
+
 import Link from "next/link";
 import MetricCard from "@/components/dashboard/MetricCard";
 import { InventoryRow } from "@/components/dashboard/InventoryRows";
 import SectionHeader from "@/components/dashboard/SectionHeader";
+import { usePurchases } from "@/hooks/usePurchases";
 import {
   aiInsights,
   formatCurrency,
@@ -10,8 +13,10 @@ import {
 } from "@/lib/mock-home";
 
 export default function OverviewView() {
+  const { monthlySpend, isLoaded } = usePurchases();
+  const currentMonthlySpend = isLoaded ? monthlySpend : householdSummary.monthlySpend;
   const budgetUsage = Math.round(
-    (householdSummary.monthlySpend / householdSummary.monthlyBudget) * 100,
+    (currentMonthlySpend / householdSummary.monthlyBudget) * 100,
   );
   const urgentProducts = inventoryProducts.filter((product) => product.status !== "ok");
   const firstUrgentProduct = urgentProducts[0] ?? inventoryProducts[0];
@@ -50,7 +55,7 @@ export default function OverviewView() {
         <MetricCard
           icon="$"
           label="Gasto mensual"
-          value={formatCurrency(householdSummary.monthlySpend)}
+          value={formatCurrency(currentMonthlySpend)}
           note={`${budgetUsage}% del presupuesto`}
           tone="pink"
         />
