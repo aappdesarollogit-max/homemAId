@@ -31,14 +31,17 @@ export function InventoryLinkRow({
   product,
   href,
   isSelected,
+  onSelect,
 }: {
   product: InventoryProduct;
   href: string;
   isSelected: boolean;
+  onSelect?: () => void;
 }) {
   return (
     <Link
       href={href}
+      onClick={onSelect}
       className={`flex items-center justify-between gap-4 rounded-3xl border p-4 transition ${
         isSelected
           ? "border-violet-400 bg-violet-500/20"

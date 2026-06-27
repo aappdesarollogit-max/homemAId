@@ -90,9 +90,7 @@ export function resolvePurchaseId(purchaseId?: string) {
 }
 
 export function resolveProductId(productId?: string) {
-  return inventoryProducts.some((product) => product.id === productId)
-    ? productId
-    : inventoryProducts[0]?.id;
+  return productId ?? inventoryProducts[0]?.id;
 }
 
 export function resolvePromptId(promptId?: string) {
@@ -116,6 +114,7 @@ export function resolveSettingsSection(section?: string) {
 }
 
 export function statusTone(status: ProductStatus) {
+  if (status === "out") return "red";
   if (status === "critical") return "red";
   if (status === "low") return "orange";
   return "green";

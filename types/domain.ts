@@ -13,7 +13,7 @@ export type HouseholdMember = {
   avatar: string;
 };
 
-export type ProductStatus = "ok" | "low" | "critical";
+export type ProductStatus = "ok" | "low" | "critical" | "out";
 
 export type InventoryProduct = {
   id: string;
@@ -25,6 +25,10 @@ export type InventoryProduct = {
   openedAt?: string;
   estimatedDaysLeft: number;
   icon: string;
+  isOpened: boolean;
+  minimumStock: number;
+  currentStock: number;
+  unit: string;
 };
 
 export type PurchaseItem = {
