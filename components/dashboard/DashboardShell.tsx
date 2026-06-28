@@ -37,7 +37,7 @@ export default function DashboardShell({
                 <Link
                   key={item.id}
                   href={`/dashboard?view=${item.id}`}
-                  className={`flex items-center gap-3 rounded-2xl px-4 py-3 font-bold transition ${
+                  className={`flex items-center gap-3 rounded-2xl px-4 py-3 font-bold transition duration-200 ease-out hover:-translate-y-0.5 active:scale-[0.98] ${
                     isActive
                       ? "bg-violet-500 text-white shadow-lg shadow-violet-950/30"
                       : "text-white/65 hover:bg-white/5 hover:text-white"
@@ -91,9 +91,9 @@ export default function DashboardShell({
                 <Link
                   key={item.id}
                   href={`/dashboard?view=${item.id}`}
-                  className={`min-touch flex flex-col items-center justify-center gap-1 rounded-2xl px-2 py-2 text-[11px] font-black transition ${
+                  className={`min-touch flex flex-col items-center justify-center gap-1 rounded-2xl px-2 py-2 text-[11px] font-black transition duration-200 ease-out active:scale-95 ${
                     isActive
-                      ? "bg-violet-500 text-white"
+                      ? "scale-[1.04] bg-violet-500 text-white shadow-lg shadow-violet-950/30"
                       : "text-white/60 hover:bg-white/5 hover:text-white"
                   }`}
                 >

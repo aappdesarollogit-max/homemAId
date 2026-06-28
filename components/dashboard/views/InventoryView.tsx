@@ -5,9 +5,15 @@ import Link from "next/link";
 import InventoryProductDetail from "@/components/dashboard/inventory/InventoryProductDetail";
 import InventoryProductForm from "@/components/dashboard/inventory/InventoryProductForm";
 import { InventoryLinkRow } from "@/components/dashboard/InventoryRows";
-import SectionHeader from "@/components/dashboard/SectionHeader";
+import AppButton from "@/components/ui/AppButton";
+import AppEmptyState from "@/components/ui/AppEmptyState";
+import AppMetric from "@/components/ui/AppMetric";
+import AppSearch from "@/components/ui/AppSearch";
 import Badge from "@/components/ui/Badge";
+import { usePurchases } from "@/hooks/usePurchases";
+import { useSettings } from "@/hooks/useSettings";
 import { inventoryFilters } from "@/lib/dashboard-utils";
+import { formatCurrency, householdSummary } from "@/lib/mock-home";
 import type { InventoryProductDraft } from "@/lib/services/inventory-service";
 import { useInventory } from "@/hooks/useInventory";
 import type { ProductStatus } from "@/types/domain";
@@ -33,6 +39,7 @@ export default function InventoryView({
   selectedProductId,
 }: InventoryViewProps) {
   const {
+    products,
     filteredProducts,
     categories,
     isLoaded,
@@ -47,6 +54,8 @@ export default function InventoryView({
     deleteProduct,
     markAsOpened,
   } = useInventory(activeFilter);
+  const { monthlySpend } = usePurchases();
+  const { settings } = useSettings();
   const [panelMode, setPanelMode] = useState<PanelMode>("detail");
   const [selectedLocalProductId, setSelectedLocalProductId] = useState(selectedProductId);
   const selectedProductCandidateId = selectedLocalProductId ?? selectedProductId;
@@ -90,34 +99,50 @@ export default function InventoryView({
     setSelectedLocalProductId(updatedProduct?.id ?? selectedProduct.id);
   }
 
+  const attentionProducts = products.filter((product) => product.status !== "ok");
+  const activeHouseholdName = settings?.name ?? householdSummary.name;
+
   return (
     <>
-      <SectionHeader
-        eyebrow="Inventario"
-        title="Productos del hogar"
-        description="Vista central para controlar stock, productos abiertos y próximos agotamientos."
-        action={
-          <button
-            type="button"
-            onClick={() => setPanelMode("create")}
-            className="rounded-2xl bg-violet-500 px-5 py-3 text-sm font-black text-white"
-          >
+      <div className="mb-6 rounded-[32px] border border-white/10 bg-gradient-to-br from-white/[0.08] to-white/[0.03] p-5 shadow-2xl shadow-black/10">
+        <div className="flex flex-col gap-5 lg:flex-row lg:items-end lg:justify-between">
+          <div>
+            <p className="text-xs font-black uppercase tracking-[0.18em] text-violet-300">
+              {activeHouseholdName}
+            </p>
+            <h1 className="mt-2 text-3xl font-black tracking-normal text-white sm:text-4xl">
+              Inventario del hogar
+            </h1>
+            <p className="mt-2 text-sm leading-relaxed text-white/55">
+              Productos, stock y alertas con una vista más densa para uso diario.
+            </p>
+          </div>
+          <AppButton type="button" onClick={() => setPanelMode("create")}>
             + Agregar producto
-          </button>
-        }
-      />
+          </AppButton>
+        </div>
+
+        <div className="mt-6 grid gap-3 sm:grid-cols-3">
+          <AppMetric label="Productos" value={String(products.length)} note="Total guardado" />
+          <AppMetric
+            label="Atención"
+            value={String(attentionProducts.length)}
+            note="Stock bajo o crítico"
+          />
+          <AppMetric label="Gasto este mes" value={formatCurrency(monthlySpend)} note="Compras reales" />
+        </div>
+      </div>
 
       <div className="mb-5 grid gap-3 lg:grid-cols-[1fr_220px_220px]">
-        <input
+        <AppSearch
           value={searchTerm}
           onChange={(event) => setSearchTerm(event.target.value)}
           placeholder="Buscar producto..."
-          className="rounded-2xl border border-white/10 bg-white/[0.04] px-4 py-3 text-sm font-bold text-white outline-none placeholder:text-white/35 focus:border-violet-400"
         />
         <select
           value={categoryFilter}
           onChange={(event) => setCategoryFilter(event.target.value)}
-          className="rounded-2xl border border-white/10 bg-[#080b19] px-4 py-3 text-sm font-bold text-white outline-none focus:border-violet-400"
+          className="min-touch rounded-2xl border border-white/10 bg-[#080b19] px-4 py-3 text-sm font-bold text-white outline-none transition duration-200 focus:border-violet-300 focus:ring-4 focus:ring-violet-500/10"
         >
           <option value="todas">Todas las categorías</option>
           {categories.map((category) => (
@@ -129,7 +154,7 @@ export default function InventoryView({
         <select
           value={statusFilter}
           onChange={(event) => setStatusFilter(event.target.value as ProductStatus | "todos")}
-          className="rounded-2xl border border-white/10 bg-[#080b19] px-4 py-3 text-sm font-bold text-white outline-none focus:border-violet-400"
+          className="min-touch rounded-2xl border border-white/10 bg-[#080b19] px-4 py-3 text-sm font-bold text-white outline-none transition duration-200 focus:border-violet-300 focus:ring-4 focus:ring-violet-500/10"
         >
           {statusOptions.map((status) => (
             <option key={status.id} value={status.id}>
@@ -139,9 +164,13 @@ export default function InventoryView({
         </select>
       </div>
 
-      <div className="mb-5 flex flex-wrap gap-2">
+      <div className="mb-5 -mx-4 flex gap-2 overflow-x-auto px-4 pb-2 scroll-smooth sm:mx-0 sm:px-0">
         {inventoryFilters.map((filter) => (
-          <Link key={filter.id} href={`/dashboard?view=inventario&filter=${filter.id}`}>
+          <Link
+            key={filter.id}
+            href={`/dashboard?view=inventario&filter=${filter.id}`}
+            className="shrink-0 transition duration-200 active:scale-95"
+          >
             <Badge tone={activeFilter === filter.id ? "violet" : "slate"}>
               {filter.label}
             </Badge>
@@ -152,9 +181,10 @@ export default function InventoryView({
       <div className="grid gap-6 xl:grid-cols-[1fr_380px]">
         <div className="space-y-3">
           {!isLoaded ? (
-            <div className="rounded-3xl border border-white/10 bg-white/[0.04] p-4 text-sm font-bold text-white/55">
-              Cargando inventario...
-            </div>
+            <AppEmptyState
+              title="Cargando inventario"
+              description="Estamos preparando tus productos guardados en este dispositivo."
+            />
           ) : filteredProducts.length > 0 ? (
             filteredProducts.map((product) => (
               <InventoryLinkRow
@@ -169,9 +199,15 @@ export default function InventoryView({
               />
             ))
           ) : (
-            <div className="rounded-3xl border border-white/10 bg-white/[0.04] p-6 text-sm font-bold text-white/55">
-              No hay productos que coincidan con la búsqueda.
-            </div>
+            <AppEmptyState
+              title="No encontramos productos"
+              description="Prueba con otra búsqueda o cambia los filtros activos."
+              action={
+                <AppButton type="button" onClick={() => setPanelMode("create")}>
+                  Agregar producto
+                </AppButton>
+              }
+            />
           )}
         </div>
 
