@@ -4,6 +4,8 @@ const NUMBER_WORDS = new Map<string, number>([
   ["un", 1],
   ["una", 1],
   ["uno", 1],
+  ["unos", 1],
+  ["unas", 1],
   ["dos", 2],
   ["tres", 3],
   ["cuatro", 4],
@@ -15,8 +17,8 @@ const NUMBER_WORDS = new Map<string, number>([
   ["diez", 10],
 ]);
 
-const LEADING_VERBS =
-  /\b(compré|compre|compramos|compré hoy|hoy compré|gasté|gaste|gastamos|registré|registre|registra que|registra)\b/gi;
+const VERB_PATTERN =
+  /\b(compre|compramos|gaste|gastamos|gasto|registre|registra|registramos|que)\b/g;
 
 function normalizeText(value: string) {
   return value
@@ -24,6 +26,18 @@ function normalizeText(value: string) {
     .normalize("NFD")
     .replace(/[\u0300-\u036f]/g, "")
     .trim();
+}
+
+function titleCase(value: string) {
+  return value
+    .split(" ")
+    .filter(Boolean)
+    .map((part) => `${part.slice(0, 1).toUpperCase()}${part.slice(1)}`)
+    .join(" ");
+}
+
+function escapeRegExp(value: string) {
+  return value.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
 }
 
 function parseMoney(text: string) {
@@ -34,8 +48,18 @@ function parseMoney(text: string) {
 }
 
 function parseStore(text: string) {
-  const match = text.match(/\b(?:en|del)\s+([a-zA-ZáéíóúÁÉÍÓÚñÑ0-9\s]+?)(?:\s+por\s+\$|\s*$|[.,])/);
-  return match?.[1]?.trim();
+  const normalized = normalizeText(text);
+  const leadingStore = normalized.match(
+    /^(?:en|del)\s+([a-z0-9\s]+?)\s+(?:compre|compramos|gaste|gastamos|gasto)\b/,
+  );
+  if (leadingStore?.[1]) return titleCase(leadingStore[1]);
+
+  const trailingStore = normalized.match(
+    /\b(?:en|del)\s+([a-z0-9\s]+?)(?=\s+por\s+\$|\s+por\s+[\d.]|\s*$|[.,])/,
+  );
+  if (trailingStore?.[1]) return titleCase(trailingStore[1]);
+
+  return undefined;
 }
 
 function parseDate(text: string) {
@@ -59,28 +83,41 @@ function parseQuantity(value?: string) {
   return NUMBER_WORDS.get(normalized) ?? 1;
 }
 
-function removeStoreSegment(text: string) {
-  return text.replace(
-    /\b(?:en|del)\s+[a-zA-ZáéíóúÁÉÍÓÚñÑ0-9\s]+?(?=\s+por\s+\$|\s*$|[.,])/gi,
-    "",
-  );
+function removeStoreContext(text: string, store?: string) {
+  let nextText = text;
+
+  if (store) {
+    const normalizedStore = normalizeText(store);
+    const storePattern = escapeRegExp(normalizedStore);
+
+    nextText = nextText.replace(
+      new RegExp(`^(?:en|del)\\s+${storePattern}\\s+`, "i"),
+      "",
+    );
+    nextText = nextText.replace(
+      new RegExp(`\\s+(?:en|del)\\s+${storePattern}(?:\\s+por\\s*)?.*$`, "i"),
+      "",
+    );
+  }
+
+  return nextText;
 }
 
-function stripNoise(text: string) {
-  return removeStoreSegment(text)
+function stripNoise(text: string, store?: string) {
+  return removeStoreContext(normalizeText(text), store)
     .replace(/\$\s?[\d.]+(?:,\d+)?/g, "")
-    .replace(LEADING_VERBS, "")
-    .replace(/\b(hoy|ayer)\b/gi, "")
-    .replace(/\b(por|en|del)\b/gi, "")
+    .replace(VERB_PATTERN, "")
+    .replace(/\b(hoy|ayer)\b/g, "")
+    .replace(/\b(por|en|del)\b/g, "")
     .replace(/[.]/g, "")
-    .replace(/\s+y\s+/gi, ", ")
+    .replace(/\s+y\s+/g, ", ")
     .replace(/\s{2,}/g, " ")
     .replace(/^,\s*/, "")
     .trim();
 }
 
-function parseProducts(text: string, totalAmount?: number): ParsedPurchaseProduct[] {
-  const productText = stripNoise(text);
+function parseProducts(text: string, store?: string, totalAmount?: number): ParsedPurchaseProduct[] {
+  const productText = stripNoise(text, store);
   if (!productText) return [];
 
   const chunks = productText
@@ -91,12 +128,12 @@ function parseProducts(text: string, totalAmount?: number): ParsedPurchaseProduc
   const products = chunks
     .map((chunk) => {
       const match = chunk.match(
-        /^(\d+(?:[.,]\d+)?|un|una|uno|dos|tres|cuatro|cinco|seis|siete|ocho|nueve|diez)\s+(.+)$/i,
+        /^(\d+(?:[.,]\d+)?|un|una|uno|unos|unas|dos|tres|cuatro|cinco|seis|siete|ocho|nueve|diez)\s+(.+)$/i,
       );
       const quantity = parseQuantity(match?.[1]);
       const productName = (match?.[2] ?? chunk)
-        .replace(LEADING_VERBS, "")
-        .replace(/\b(hoy|ayer)\b/gi, "")
+        .replace(VERB_PATTERN, "")
+        .replace(/\b(hoy|ayer)\b/g, "")
         .trim();
 
       return {
@@ -104,7 +141,7 @@ function parseProducts(text: string, totalAmount?: number): ParsedPurchaseProduc
         normalizedName: productName,
         quantity,
         unit: "unidades",
-        confidence: match ? 76 : 60,
+        confidence: match ? 78 : 60,
       };
     })
     .filter((product) => product.productName.length > 0);
@@ -125,7 +162,7 @@ export default class TextParser {
     const totalAmount = parseMoney(originalText);
     const store = parseStore(originalText);
     const date = parseDate(originalText);
-    const products = parseProducts(originalText, totalAmount);
+    const products = parseProducts(originalText, store, totalAmount);
 
     if (!originalText) errors.push("Texto obligatorio.");
     if (products.length === 0) warnings.push("No se detectaron productos con suficiente claridad.");

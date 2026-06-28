@@ -2,6 +2,8 @@ import type { ParsedPurchase } from "@/core/platform/input/InputTypes";
 import type { InventoryProduct } from "@/types/domain";
 
 const PRODUCT_ALIASES = new Map<string, string>([
+  ["atun", "atun"],
+  ["atunes", "atun"],
   ["lechita", "leche"],
   ["leches", "leche"],
   ["huevos", "huevo"],
@@ -10,7 +12,15 @@ const PRODUCT_ALIASES = new Map<string, string>([
   ["panes", "pan"],
 ]);
 
+const PRODUCT_DISPLAY_NAMES = new Map<string, string>([
+  ["atun", "Atún"],
+  ["leche", "Leche"],
+  ["huevo", "Huevos"],
+  ["yogurt", "Yogurt"],
+]);
+
 const CATEGORY_HINTS = new Map<string, string>([
+  ["atun", "Despensa"],
   ["leche", "Lácteos"],
   ["yogurt", "Lácteos"],
   ["queso", "Lácteos"],
@@ -44,15 +54,19 @@ export default class EntityResolver {
     const products = parsedPurchase.products.map((product) => {
       const normalizedName = normalize(product.productName);
       const aliasName = PRODUCT_ALIASES.get(normalizedName) ?? normalizedName;
-      const existingProduct = this.inventoryProducts.find(
-        (inventoryProduct) =>
-          normalize(inventoryProduct.name) === aliasName ||
-          normalize(inventoryProduct.name).includes(aliasName) ||
-          aliasName.includes(normalize(inventoryProduct.name)),
-      );
+      const existingProduct = this.inventoryProducts.find((inventoryProduct) => {
+        const inventoryName = normalize(inventoryProduct.name);
+
+        return (
+          inventoryName === aliasName ||
+          inventoryName.includes(aliasName) ||
+          aliasName.includes(inventoryName)
+        );
+      });
       const category =
         existingProduct?.category ?? CATEGORY_HINTS.get(aliasName) ?? product.category;
-      const resolvedName = existingProduct?.name ?? titleCase(aliasName);
+      const resolvedName =
+        existingProduct?.name ?? PRODUCT_DISPLAY_NAMES.get(aliasName) ?? titleCase(aliasName);
 
       return {
         ...product,

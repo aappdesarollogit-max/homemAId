@@ -39,6 +39,8 @@ Texto libre
 
 - `Compré 2 leches y un pan en Lider por $25.000`
   - Esperado: Leche entera o Leche x2 unidades, Pan x1 unidad, tienda Lider, monto 25000.
+- `Compré 2 atunes y un huevos en Jumbo por $55.000`
+  - Esperado: Atún x2 unidades, Huevos x1 unidad, tienda Jumbo, monto 55000.
 - `Compré arroz, azúcar, aceite y huevos`
   - Esperado: cuatro productos limpios, cantidad 1 por defecto.
 - `En Jumbo compré 3 yogures por $5.400`
