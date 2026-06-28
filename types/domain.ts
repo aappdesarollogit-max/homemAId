@@ -154,6 +154,9 @@ export type HouseholdRecommendation = {
   impact: "ahorro" | "urgencia" | "organización" | "prevención" | "presupuesto";
   actionLabel?: string;
   relatedProducts: string[];
+  confidence?: number;
+  explanation?: string;
+  origin?: string;
 };
 
 export type HouseholdAlert = {
@@ -184,6 +187,7 @@ export type HouseholdIntelligenceSummary = {
   recommendations: HouseholdRecommendation[];
   alerts: HouseholdAlert[];
   patterns: HouseholdPattern[];
+  knowledge?: HouseholdKnowledge;
 };
 
 export type HouseholdMemorySnapshot = {
@@ -195,6 +199,105 @@ export type HouseholdMemorySnapshot = {
     score: number;
     createdAt: string;
   }>;
+};
+
+export type KnowledgeNodeType =
+  | "product"
+  | "category"
+  | "store"
+  | "frequency"
+  | "consumption"
+  | "member"
+  | "priority"
+  | "stock"
+  | "prediction"
+  | "budget";
+
+export type KnowledgeNode = {
+  id: string;
+  type: KnowledgeNodeType;
+  label: string;
+  metadata?: Record<string, string | number | boolean | undefined>;
+};
+
+export type KnowledgeEdge = {
+  id: string;
+  from: string;
+  to: string;
+  relation:
+    | "belongs_to"
+    | "bought_at"
+    | "has_frequency"
+    | "affects_consumption"
+    | "used_by"
+    | "has_priority"
+    | "has_stock"
+    | "has_prediction"
+    | "affects_budget";
+  weight: number;
+  confidence: number;
+};
+
+export type KnowledgeGraph = {
+  nodes: KnowledgeNode[];
+  edges: KnowledgeEdge[];
+  generatedAt: string;
+};
+
+export type HouseholdTimelineEvent = {
+  id: string;
+  type:
+    | "purchase_created"
+    | "budget_changed"
+    | "product_added"
+    | "product_deleted"
+    | "product_out"
+    | "stock_critical"
+    | "prediction_fulfilled"
+    | "recommendation_accepted"
+    | "knowledge_refreshed";
+  title: string;
+  description: string;
+  createdAt: string;
+  source: "inventory" | "purchases" | "settings" | "intelligence" | "system";
+  relatedEntityId?: string;
+};
+
+export type PatternMemoryItem = {
+  id: string;
+  title: string;
+  description: string;
+  confidence: number;
+  firstSeenAt: string;
+  lastSeenAt: string;
+  occurrences: number;
+  relatedProducts: string[];
+};
+
+export type ConfidenceInsight = {
+  id: string;
+  label: string;
+  confidence: number;
+  reason: string;
+};
+
+export type KnowledgeExplanation = {
+  id: string;
+  targetId: string;
+  targetType: "recommendation" | "prediction" | "pattern";
+  summary: string;
+  reasons: string[];
+  confidence: number;
+  origin: string;
+};
+
+export type HouseholdKnowledge = {
+  graph: KnowledgeGraph;
+  timeline: HouseholdTimelineEvent[];
+  patternMemory: PatternMemoryItem[];
+  confidenceInsights: ConfidenceInsight[];
+  explanations: KnowledgeExplanation[];
+  updatedAt: string;
 };
 
 export type AssistantContext = {

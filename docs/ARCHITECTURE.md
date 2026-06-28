@@ -5,6 +5,7 @@
 - `app/`: rutas Next.js y composicion de pantallas.
 - `components/`: UI reutilizable.
 - `hooks/`: estado cliente por modulo.
+- `core/knowledge/`: plataforma de conocimiento interno del hogar.
 - `lib/services/`: reglas de dominio y persistencia local.
 - `lib/ingestion/`: pipeline central de ingreso de datos.
 - `lib/intelligence/`: analisis local, predicciones, recomendaciones, alertas y score.
@@ -22,6 +23,19 @@ localStorage data -> HomeIntelligenceEngine -> hook -> Overview / Consumption / 
 ```
 
 La UI no calcula inteligencia directamente; consume el hook `useHomeIntelligence`.
+
+## BETA 1 - Household Intelligence
+
+BETA 1 agrega `core/knowledge/` como base del conocimiento interno:
+
+- `KnowledgeGraph`: relaciones entre productos, categorias, tiendas, frecuencia, consumo, integrantes, prioridad, stock y predicciones.
+- `HouseholdTimeline`: eventos temporales derivados de compras, inventario, presupuesto e inteligencia.
+- `PatternMemory`: memoria persistente de patrones detectados.
+- `ConfidenceEngine`: confianza local 0-100.
+- `ExplanationEngine`: razones trazables para recomendaciones y predicciones.
+- `KnowledgeRepository`: repositorio unico para leer, guardar, actualizar y refrescar conocimiento.
+
+`HomeIntelligenceEngine` consume esta capa y expone conocimiento a Overview, Consumo y Asistente.
 
 ## PWA
 

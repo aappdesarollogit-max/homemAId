@@ -1,4 +1,5 @@
 import { generateHouseholdAlerts } from "@/lib/intelligence/AlertEngine";
+import { refreshKnowledge } from "@/core/knowledge/KnowledgeRepository";
 import {
   calculateHouseholdHealthScore,
   getRiskLevel,
@@ -74,6 +75,28 @@ export function generateHomeIntelligence({
     alerts,
     budgetUsage,
   });
+  const knowledge = refreshKnowledge({
+    inventoryProducts,
+    purchases,
+    settings,
+    members,
+    patterns,
+    predictions,
+    recommendations,
+    alerts,
+  });
+  const recommendationsWithKnowledge = recommendations.map((recommendation) => {
+    const explanation = knowledge.explanations.find(
+      (candidate) => candidate.targetId === recommendation.id,
+    );
+
+    return {
+      ...recommendation,
+      confidence: explanation?.confidence,
+      explanation: explanation?.summary,
+      origin: explanation?.origin,
+    };
+  });
   const summary: HouseholdIntelligenceSummary = {
     healthScore,
     riskLevel: getRiskLevel(healthScore),
@@ -86,15 +109,16 @@ export function generateHomeIntelligence({
         prediction.predictionType === "stock_out" ||
         prediction.predictionType === "restock",
     ),
-    recommendations,
+    recommendations: recommendationsWithKnowledge,
     alerts,
     patterns,
+    knowledge,
   };
 
   if (persistMemory) {
     persistIntelligenceSnapshot({
       patterns,
-      recommendations,
+      recommendations: recommendationsWithKnowledge,
       alerts,
       healthScore,
     });

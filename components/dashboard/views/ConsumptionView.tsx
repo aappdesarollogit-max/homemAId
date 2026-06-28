@@ -36,6 +36,9 @@ export default function ConsumptionView() {
       : 0;
   const budgetRisk = intelligenceSummary?.riskLevel ?? "low";
   const visiblePatterns = intelligenceSummary?.patterns.slice(0, 3) ?? [];
+  const visiblePredictions = intelligenceSummary?.predictedStockOuts.slice(0, 3) ?? [];
+  const confidenceInsights = intelligenceSummary?.knowledge?.confidenceInsights.slice(0, 3) ?? [];
+  const explanations = intelligenceSummary?.knowledge?.explanations.slice(0, 3) ?? [];
   const spendingAlerts =
     intelligenceSummary?.alerts
       .filter((alert) =>
@@ -101,6 +104,32 @@ export default function ConsumptionView() {
           <SpendByStore items={spendByStore} />
           <TopProducts products={topPurchasedProducts} />
           <section className="rounded-3xl border border-white/10 bg-white/[0.04] p-6">
+            <h2 className="text-2xl font-black">Predicciones</h2>
+            <div className="mt-5 space-y-3">
+              {visiblePredictions.length > 0 ? (
+                visiblePredictions.map((prediction) => (
+                  <div key={prediction.id} className="rounded-2xl bg-white/5 p-4">
+                    <div className="flex items-start justify-between gap-3">
+                      <div>
+                        <p className="font-black">{prediction.title}</p>
+                        <p className="mt-1 text-sm leading-relaxed text-white/55">
+                          {prediction.description}
+                        </p>
+                      </div>
+                      <Badge tone={prediction.severity === "critical" || prediction.severity === "high" ? "red" : "violet"}>
+                        {prediction.confidence}%
+                      </Badge>
+                    </div>
+                  </div>
+                ))
+              ) : (
+                <p className="text-sm font-bold text-white/55">
+                  No hay predicciones de consumo activas.
+                </p>
+              )}
+            </div>
+          </section>
+          <section className="rounded-3xl border border-white/10 bg-white/[0.04] p-6">
             <h2 className="text-2xl font-black">Patrones detectados</h2>
             <div className="mt-5 space-y-3">
               {visiblePatterns.length > 0 ? (
@@ -124,6 +153,40 @@ export default function ConsumptionView() {
                   Aún no hay historial suficiente para detectar patrones.
                 </p>
               )}
+            </div>
+          </section>
+          <section className="rounded-3xl border border-white/10 bg-white/[0.04] p-6">
+            <h2 className="text-2xl font-black">Confianza y explicaciones</h2>
+            <div className="mt-5 space-y-3">
+              {confidenceInsights.length > 0 ? (
+                confidenceInsights.map((insight) => (
+                  <div key={insight.id} className="rounded-2xl bg-white/5 p-4">
+                    <div className="flex items-center justify-between gap-3">
+                      <p className="font-black">{insight.label}</p>
+                      <span className="text-sm font-black text-violet-300">
+                        {insight.confidence}%
+                      </span>
+                    </div>
+                    <p className="mt-1 text-sm leading-relaxed text-white/55">
+                      {insight.reason}
+                    </p>
+                  </div>
+                ))
+              ) : (
+                <p className="text-sm font-bold text-white/55">
+                  La confianza crecerá con más compras registradas.
+                </p>
+              )}
+              {explanations.length > 0 ? (
+                <div className="rounded-2xl bg-black/20 p-4">
+                  <p className="text-sm font-black text-violet-200">
+                    {explanations[0].summary}
+                  </p>
+                  <p className="mt-2 text-xs font-bold leading-relaxed text-white/50">
+                    {explanations[0].reasons.join(" ")}
+                  </p>
+                </div>
+              ) : null}
             </div>
           </section>
           <section className="rounded-3xl border border-white/10 bg-white/[0.04] p-6">

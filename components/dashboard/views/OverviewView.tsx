@@ -38,6 +38,48 @@ export default function OverviewView() {
   const topRecommendations = intelligenceSummary?.recommendations.slice(0, 2) ?? [];
   const topAlerts = intelligenceSummary?.alerts.slice(0, 2) ?? [];
   const nextAction = topRecommendations[0]?.actionLabel ?? "Actualizar datos";
+  const topPattern = intelligenceSummary?.knowledge?.patternMemory[0];
+  const nextPurchase = intelligenceSummary?.predictedStockOuts[0];
+  const highestRisk = intelligenceSummary?.alerts[0];
+  const highestSaving = intelligenceSummary?.recommendations.find(
+    (recommendation) =>
+      recommendation.impact === "ahorro" || recommendation.impact === "presupuesto",
+  );
+  const highestConfidence = intelligenceSummary?.knowledge?.confidenceInsights[0];
+  const householdInsights = [
+    {
+      id: "top-pattern",
+      label: "Top patrón",
+      value: topPattern?.title ?? "Sin patrón fuerte",
+      note: topPattern?.description ?? "Aún falta historial para detectar hábitos.",
+    },
+    {
+      id: "next-purchase",
+      label: "Próxima compra",
+      value: nextPurchase?.productName ?? "Sin urgencia",
+      note: nextPurchase?.description ?? "No hay productos proyectados como urgentes.",
+    },
+    {
+      id: "highest-risk",
+      label: "Mayor riesgo",
+      value: highestRisk?.title ?? "Controlado",
+      note: highestRisk?.description ?? "No hay alertas críticas activas.",
+    },
+    {
+      id: "highest-saving",
+      label: "Mayor ahorro",
+      value: highestSaving?.title ?? "Sin fuga clara",
+      note: highestSaving?.description ?? "El motor no detecta ahorro prioritario.",
+    },
+    {
+      id: "highest-confidence",
+      label: "Mayor confianza",
+      value: highestConfidence?.label ?? "Datos iniciales",
+      note: highestConfidence
+        ? `${highestConfidence.confidence}% · ${highestConfidence.reason}`
+        : "La confianza crecerá con más historial.",
+    },
+  ];
   const aiInsights = [
     urgentProducts.length > 0
       ? {
@@ -154,6 +196,33 @@ export default function OverviewView() {
               )}
             </div>
           </div>
+        </div>
+      </section>
+
+      <section className="mt-8 rounded-3xl border border-white/10 bg-white/[0.04] p-6">
+        <div className="flex items-center justify-between gap-4">
+          <div>
+            <p className="text-xs font-black uppercase tracking-[0.18em] text-violet-300">
+              Household Knowledge
+            </p>
+            <h2 className="mt-2 text-2xl font-black">Insights del hogar</h2>
+          </div>
+          <Badge tone="violet">
+            {intelligenceSummary?.knowledge?.graph.nodes.length ?? 0} nodos
+          </Badge>
+        </div>
+        <div className="mt-5 grid gap-3 sm:grid-cols-2 xl:grid-cols-5">
+          {householdInsights.map((insight) => (
+            <div key={insight.id} className="rounded-2xl bg-white/5 p-4">
+              <p className="text-xs font-black uppercase tracking-[0.14em] text-white/40">
+                {insight.label}
+              </p>
+              <p className="mt-2 text-sm font-black text-white">{insight.value}</p>
+              <p className="mt-2 text-xs font-bold leading-relaxed text-white/50">
+                {insight.note}
+              </p>
+            </div>
+          ))}
         </div>
       </section>
 

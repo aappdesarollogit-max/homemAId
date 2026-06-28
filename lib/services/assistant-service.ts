@@ -71,6 +71,20 @@ function formatProductList(products: Array<{ name: string }>) {
   return `${names.slice(0, -1).join(", ")} y ${names[names.length - 1]}`;
 }
 
+function formatRecommendationWithKnowledge(recommendation: {
+  title: string;
+  description: string;
+  confidence?: number;
+  explanation?: string;
+  origin?: string;
+}) {
+  const confidence = recommendation.confidence ?? 55;
+  const explanation = recommendation.explanation ?? recommendation.description;
+  const origin = recommendation.origin ?? "Home Intelligence Engine";
+
+  return `${recommendation.title}. Confianza: ${confidence}%. Explicación: ${explanation} Origen: ${origin}.`;
+}
+
 export function getAssistantContext(): AssistantContext {
   const inventoryProducts = getInventoryProducts();
   const purchases = getPurchases();
@@ -255,6 +269,14 @@ export function getMonthlySpendAnswer(context: AssistantContext) {
 }
 
 export function getShoppingRecommendation(context: AssistantContext) {
+  const recommendation = context.intelligenceSummary?.recommendations.find(
+    (candidate) => candidate.type === "shopping" || candidate.type === "inventory",
+  );
+
+  if (recommendation) {
+    return formatRecommendationWithKnowledge(recommendation);
+  }
+
   const criticalProducts = context.consumptionMetrics.criticalProducts;
 
   if (criticalProducts.length === 0) {
@@ -335,10 +357,7 @@ export function getIntelligenceRecommendationAnswer(context: AssistantContext) {
     return "No tengo recomendaciones inteligentes suficientes todavía. Agrega compras e inventario para detectar mejores señales.";
   }
 
-  return recommendations
-    .slice(0, 3)
-    .map((recommendation) => `${recommendation.title}: ${recommendation.description}`)
-    .join(" ");
+  return recommendations.slice(0, 3).map(formatRecommendationWithKnowledge).join(" ");
 }
 
 export function getIntelligenceStatusAnswer(context: AssistantContext) {
