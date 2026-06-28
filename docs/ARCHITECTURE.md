@@ -7,6 +7,7 @@
 - `hooks/`: estado cliente por modulo.
 - `core/knowledge/`: plataforma de conocimiento interno del hogar.
 - `core/platform/`: Event Bus, Smart Input y preparacion de automatizaciones.
+- `core/product/`: Product Intelligence System para feedback, bugs, decisiones, roadmap y analitica Alpha.
 - `lib/services/`: reglas de dominio y persistencia local.
 - `lib/ingestion/`: pipeline central de ingreso de datos.
 - `lib/intelligence/`: analisis local, predicciones, recomendaciones, alertas y score.
@@ -64,6 +65,25 @@ La entrada en lenguaje natural vive sobre Platform Core:
 - `QuickPurchaseCard` muestra previsualizacion antes de confirmar.
 
 Al confirmar, la compra entra por `SmartInputFramework` y luego `DataIngestionEngine`, manteniendo el flujo unico de compras.
+
+## Alpha 1.1 - Product Intelligence
+
+Alpha 1.1 agrega `core/product/` como capa local de aprendizaje de producto:
+
+- `FeedbackEngine` captura y consulta feedback.
+- `BugEngine` registra errores reportados.
+- `FeatureRequestEngine` organiza ideas.
+- `ProductDecisionEngine` deja trazabilidad de decisiones.
+- `RoadmapEngine` sugiere prioridades por recurrencia y severidad.
+- `AnalyticsEngine` resume KPIs de Alpha Cerrada y lee senales del Event Bus.
+
+El flujo principal es:
+
+```text
+Settings Feedback -> core/product -> localStorage -> Product Dashboard -> JSON/CSV export
+```
+
+La vista administrativa se expone en `/dashboard?view=product`.
 
 ## PWA
 

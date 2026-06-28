@@ -18,6 +18,7 @@ export const dashboardViews: Array<{
   { id: "consumo", label: "Consumo", icon: "↗" },
   { id: "asistente", label: "Asistente IA", icon: "✦" },
   { id: "ajustes", label: "Ajustes", icon: "⚙" },
+  { id: "product", label: "Producto", icon: "◇" },
 ];
 
 export const householdSummary: HouseholdSummary = {

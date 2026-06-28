@@ -2,6 +2,7 @@
 
 import Link from "next/link";
 import BudgetSettings from "@/components/dashboard/settings/BudgetSettings";
+import FeedbackForm from "@/components/dashboard/settings/FeedbackForm";
 import HouseholdForm from "@/components/dashboard/settings/HouseholdForm";
 import MembersManager from "@/components/dashboard/settings/MembersManager";
 import PreferencesForm from "@/components/dashboard/settings/PreferencesForm";
@@ -86,6 +87,8 @@ export default function SettingsView({
             />
           ) : activeSettingsSection === "preferencias" ? (
             <PreferencesForm settings={activeSettings} onSave={updateSettings} />
+          ) : activeSettingsSection === "feedback" ? (
+            <FeedbackForm />
           ) : (
             <HouseholdForm settings={activeSettings} onSave={updateSettings} />
           )}

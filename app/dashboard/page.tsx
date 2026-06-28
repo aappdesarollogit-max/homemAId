@@ -3,6 +3,7 @@ import AssistantView from "@/components/dashboard/views/AssistantView";
 import ConsumptionView from "@/components/dashboard/views/ConsumptionView";
 import InventoryView from "@/components/dashboard/views/InventoryView";
 import OverviewView from "@/components/dashboard/views/OverviewView";
+import ProductView from "@/components/dashboard/views/ProductView";
 import PurchasesView from "@/components/dashboard/views/PurchasesView";
 import SettingsView from "@/components/dashboard/views/SettingsView";
 import {
@@ -64,6 +65,7 @@ function renderView(
   if (view === "ajustes") {
     return <SettingsView activeSettingsSection={activeSettingsSection} />;
   }
+  if (view === "product") return <ProductView />;
 
   return <OverviewView />;
 }

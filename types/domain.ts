@@ -4,7 +4,8 @@ export type DashboardView =
   | "compras"
   | "consumo"
   | "asistente"
-  | "ajustes";
+  | "ajustes"
+  | "product";
 
 export type HouseholdMember = {
   id: string;

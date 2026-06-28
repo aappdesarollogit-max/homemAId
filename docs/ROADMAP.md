@@ -9,6 +9,7 @@
 - Household Knowledge Platform con grafo, timeline, memoria de patrones, confianza y explicaciones.
 - Platform Core con Event Bus, Smart Input y Automation Engine preparado.
 - Natural Language Input para compra rapida con previsualizacion.
+- Product Intelligence System para capturar feedback, bugs, ideas, decisiones, analitica y roadmap sugerido.
 - PWA ready y experiencia mobile-first.
 
 ## Release Alpha
@@ -44,6 +45,16 @@
 - Confirmar compra por Smart Input y Data Ingestion.
 - Reutilizar parser desde el Asistente.
 - Registrar eventos `text.input.*`.
+
+## Alpha 1.1 - Product Intelligence System
+
+- Capturar feedback desde Ajustes.
+- Crear dashboard administrativo `/dashboard?view=product`.
+- Registrar bugs, ideas y decisiones de producto.
+- Generar roadmap sugerido desde recurrencia y prioridad.
+- Exponer KPIs de Alpha Cerrada.
+- Exportar feedback en JSON y CSV.
+- Mantener OpenAI y Supabase fuera del alcance.
 
 ## Sprint 10 sugerido
 

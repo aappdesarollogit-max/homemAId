@@ -13,6 +13,7 @@ const validViews = new Set<DashboardView>([
   "consumo",
   "asistente",
   "ajustes",
+  "product",
 ]);
 
 export const inventoryFilters = [
@@ -74,6 +75,7 @@ export const settingsSections = [
   { id: "integrantes", label: "Integrantes" },
   { id: "presupuesto", label: "Presupuesto" },
   { id: "preferencias", label: "Preferencias" },
+  { id: "feedback", label: "Feedback" },
 ];
 
 export function resolveView(view?: string): DashboardView {
