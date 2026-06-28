@@ -127,7 +127,7 @@ export default function PurchaseForm({
   }
 
   return (
-    <aside className="rounded-3xl bg-white p-6 text-slate-950">
+    <aside className="max-h-[calc(100dvh-150px)] overflow-y-auto rounded-3xl bg-white p-5 text-slate-950 sm:p-6">
       <p className="text-sm font-black uppercase tracking-[0.18em] text-violet-600">
         Nueva compra
       </p>
@@ -142,7 +142,7 @@ export default function PurchaseForm({
           <input
             value={store}
             onChange={(event) => setStore(event.target.value)}
-            className="w-full rounded-2xl border border-slate-200 bg-slate-50 px-4 py-3 text-sm font-bold outline-none focus:border-violet-400"
+            className="min-touch w-full rounded-2xl border border-slate-200 bg-slate-50 px-4 py-3 text-sm font-bold outline-none focus:border-violet-400"
           />
           {errors.store ? <span className="mt-1 block text-xs font-bold text-red-500">{errors.store}</span> : null}
         </label>
@@ -153,7 +153,7 @@ export default function PurchaseForm({
             <button
               type="button"
               onClick={() => setItems((currentItems) => [...currentItems, createEmptyItem()])}
-              className="text-xs font-black text-violet-600"
+              className="min-touch rounded-xl px-2 text-xs font-black text-violet-600"
             >
               + Agregar
             </button>
@@ -182,7 +182,7 @@ export default function PurchaseForm({
                         onChange={(event) =>
                           updateItem(item.localId, "productName", event.target.value)
                         }
-                        className="w-full rounded-2xl border border-slate-200 bg-white px-4 py-3 text-sm font-bold outline-none focus:border-violet-400"
+                        className="min-touch w-full rounded-2xl border border-slate-200 bg-white px-4 py-3 text-sm font-bold outline-none focus:border-violet-400"
                       />
                       {itemErrors.productName ? (
                         <span className="mt-1 block text-xs font-bold text-red-500">
@@ -191,7 +191,7 @@ export default function PurchaseForm({
                       ) : null}
                     </label>
 
-                    <div className="grid grid-cols-3 gap-3">
+                    <div className="grid gap-3 sm:grid-cols-3">
                       <label className="block">
                         <span className="mb-2 block text-xs font-black text-slate-600">
                           Cantidad
@@ -203,7 +203,7 @@ export default function PurchaseForm({
                           onChange={(event) =>
                             updateItem(item.localId, "quantity", readNumber(event.target.value))
                           }
-                          className="w-full rounded-2xl border border-slate-200 bg-white px-4 py-3 text-sm font-bold outline-none focus:border-violet-400"
+                          className="min-touch w-full rounded-2xl border border-slate-200 bg-white px-4 py-3 text-sm font-bold outline-none focus:border-violet-400"
                         />
                       </label>
                       <label className="block">
@@ -215,7 +215,7 @@ export default function PurchaseForm({
                           onChange={(event) =>
                             updateItem(item.localId, "unit", event.target.value)
                           }
-                          className="w-full rounded-2xl border border-slate-200 bg-white px-4 py-3 text-sm font-bold outline-none focus:border-violet-400"
+                          className="min-touch w-full rounded-2xl border border-slate-200 bg-white px-4 py-3 text-sm font-bold outline-none focus:border-violet-400"
                         />
                       </label>
                       <label className="block">
@@ -229,7 +229,7 @@ export default function PurchaseForm({
                           onChange={(event) =>
                             updateItem(item.localId, "price", readNumber(event.target.value))
                           }
-                          className="w-full rounded-2xl border border-slate-200 bg-white px-4 py-3 text-sm font-bold outline-none focus:border-violet-400"
+                          className="min-touch w-full rounded-2xl border border-slate-200 bg-white px-4 py-3 text-sm font-bold outline-none focus:border-violet-400"
                         />
                       </label>
                     </div>
@@ -243,7 +243,7 @@ export default function PurchaseForm({
                     <button
                       type="button"
                       onClick={() => removeItem(item.localId)}
-                      className="text-left text-xs font-black text-red-500"
+                      className="min-touch rounded-xl text-left text-xs font-black text-red-500"
                     >
                       Eliminar producto
                     </button>
@@ -260,17 +260,17 @@ export default function PurchaseForm({
           <span className="text-2xl font-black text-violet-600">{formatCurrency(total)}</span>
         </div>
 
-        <div className="grid grid-cols-2 gap-3">
+        <div className="grid gap-3 sm:grid-cols-2">
           <button
             type="button"
             onClick={onCancel}
-            className="rounded-2xl border border-slate-200 px-4 py-3 text-center text-sm font-black text-slate-700"
+            className="min-touch rounded-2xl border border-slate-200 px-4 py-3 text-center text-sm font-black text-slate-700"
           >
             Cancelar
           </button>
           <button
             type="submit"
-            className="rounded-2xl bg-violet-500 px-4 py-3 text-sm font-black text-white"
+            className="min-touch rounded-2xl bg-violet-500 px-4 py-3 text-sm font-black text-white"
           >
             Guardar
           </button>

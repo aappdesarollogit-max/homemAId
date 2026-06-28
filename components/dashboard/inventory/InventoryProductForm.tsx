@@ -74,7 +74,7 @@ export default function InventoryProductForm({
   }
 
   return (
-    <form onSubmit={handleSubmit} className="rounded-3xl bg-white p-5 text-slate-950">
+    <form onSubmit={handleSubmit} className="max-h-[calc(100dvh-150px)] overflow-y-auto rounded-3xl bg-white p-5 text-slate-950">
       <p className="text-sm font-black uppercase tracking-[0.16em] text-violet-600">
         {title}
       </p>
@@ -86,18 +86,18 @@ export default function InventoryProductForm({
           <input
             value={formProduct.name}
             onChange={(event) => updateField("name", event.target.value)}
-            className="w-full rounded-2xl border border-slate-200 bg-slate-50 px-4 py-3 text-sm font-bold outline-none focus:border-violet-400"
+            className="min-touch w-full rounded-2xl border border-slate-200 bg-slate-50 px-4 py-3 text-sm font-bold outline-none focus:border-violet-400"
           />
           {errors.name ? <span className="mt-1 block text-xs font-bold text-red-500">{errors.name}</span> : null}
         </label>
 
-        <div className="grid grid-cols-2 gap-3">
+        <div className="grid gap-3 sm:grid-cols-2">
           <label className="block">
             <span className="mb-2 block text-xs font-black text-slate-600">Categoría</span>
             <input
               value={formProduct.category}
               onChange={(event) => updateField("category", event.target.value)}
-              className="w-full rounded-2xl border border-slate-200 bg-slate-50 px-4 py-3 text-sm font-bold outline-none focus:border-violet-400"
+              className="min-touch w-full rounded-2xl border border-slate-200 bg-slate-50 px-4 py-3 text-sm font-bold outline-none focus:border-violet-400"
             />
             {errors.category ? <span className="mt-1 block text-xs font-bold text-red-500">{errors.category}</span> : null}
           </label>
@@ -107,12 +107,12 @@ export default function InventoryProductForm({
             <input
               value={formProduct.icon}
               onChange={(event) => updateField("icon", event.target.value)}
-              className="w-full rounded-2xl border border-slate-200 bg-slate-50 px-4 py-3 text-sm font-bold outline-none focus:border-violet-400"
+              className="min-touch w-full rounded-2xl border border-slate-200 bg-slate-50 px-4 py-3 text-sm font-bold outline-none focus:border-violet-400"
             />
           </label>
         </div>
 
-        <div className="grid grid-cols-2 gap-3">
+        <div className="grid gap-3 sm:grid-cols-2">
           <label className="block">
             <span className="mb-2 block text-xs font-black text-slate-600">Stock actual</span>
             <input
@@ -120,7 +120,7 @@ export default function InventoryProductForm({
               min={0}
               value={formProduct.currentStock}
               onChange={(event) => updateField("currentStock", readNumber(event.target.value))}
-              className="w-full rounded-2xl border border-slate-200 bg-slate-50 px-4 py-3 text-sm font-bold outline-none focus:border-violet-400"
+              className="min-touch w-full rounded-2xl border border-slate-200 bg-slate-50 px-4 py-3 text-sm font-bold outline-none focus:border-violet-400"
             />
             {errors.currentStock ? <span className="mt-1 block text-xs font-bold text-red-500">{errors.currentStock}</span> : null}
           </label>
@@ -132,19 +132,19 @@ export default function InventoryProductForm({
               min={0}
               value={formProduct.minimumStock}
               onChange={(event) => updateField("minimumStock", readNumber(event.target.value))}
-              className="w-full rounded-2xl border border-slate-200 bg-slate-50 px-4 py-3 text-sm font-bold outline-none focus:border-violet-400"
+              className="min-touch w-full rounded-2xl border border-slate-200 bg-slate-50 px-4 py-3 text-sm font-bold outline-none focus:border-violet-400"
             />
             {errors.minimumStock ? <span className="mt-1 block text-xs font-bold text-red-500">{errors.minimumStock}</span> : null}
           </label>
         </div>
 
-        <div className="grid grid-cols-2 gap-3">
+        <div className="grid gap-3 sm:grid-cols-2">
           <label className="block">
             <span className="mb-2 block text-xs font-black text-slate-600">Unidad</span>
             <input
               value={formProduct.unit}
               onChange={(event) => updateField("unit", event.target.value)}
-              className="w-full rounded-2xl border border-slate-200 bg-slate-50 px-4 py-3 text-sm font-bold outline-none focus:border-violet-400"
+              className="min-touch w-full rounded-2xl border border-slate-200 bg-slate-50 px-4 py-3 text-sm font-bold outline-none focus:border-violet-400"
             />
             {errors.unit ? <span className="mt-1 block text-xs font-bold text-red-500">{errors.unit}</span> : null}
           </label>
@@ -158,7 +158,7 @@ export default function InventoryProductForm({
               onChange={(event) =>
                 updateField("estimatedDaysLeft", readNumber(event.target.value))
               }
-              className="w-full rounded-2xl border border-slate-200 bg-slate-50 px-4 py-3 text-sm font-bold outline-none focus:border-violet-400"
+              className="min-touch w-full rounded-2xl border border-slate-200 bg-slate-50 px-4 py-3 text-sm font-bold outline-none focus:border-violet-400"
             />
             {errors.estimatedDaysLeft ? (
               <span className="mt-1 block text-xs font-bold text-red-500">
@@ -169,17 +169,17 @@ export default function InventoryProductForm({
         </div>
       </div>
 
-      <div className="mt-5 grid grid-cols-2 gap-3">
+      <div className="mt-5 grid gap-3 sm:grid-cols-2">
         <button
           type="button"
           onClick={onCancel}
-          className="rounded-2xl border border-slate-200 px-4 py-3 text-center text-sm font-black text-slate-700"
+          className="min-touch rounded-2xl border border-slate-200 px-4 py-3 text-center text-sm font-black text-slate-700"
         >
           Cancelar
         </button>
         <button
           type="submit"
-          className="rounded-2xl bg-violet-500 px-4 py-3 text-sm font-black text-white"
+          className="min-touch rounded-2xl bg-violet-500 px-4 py-3 text-sm font-black text-white"
         >
           {submitLabel}
         </button>

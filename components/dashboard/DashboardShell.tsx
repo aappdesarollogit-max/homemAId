@@ -5,7 +5,7 @@ import type { ReactNode } from "react";
 
 function AppLogo() {
   return (
-    <Link href="/" className="mb-10 flex items-center gap-3">
+    <Link href="/" className="flex items-center gap-3 lg:mb-10">
       <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-gradient-to-br from-violet-400 to-fuchsia-500 text-2xl shadow-lg shadow-violet-900/40">
         ⌂
       </div>
@@ -60,36 +60,50 @@ export default function DashboardShell({
           </div>
         </aside>
 
-        <section className="min-h-screen w-full p-5 md:p-8 lg:p-10">
+        <section className="min-h-screen w-full px-4 pb-28 pt-5 sm:px-5 md:p-8 lg:p-10">
           <div className="mb-6 flex items-center justify-between gap-4 lg:hidden">
             <AppLogo />
             <Link
               href="/"
-              className="rounded-full bg-white px-4 py-2 text-sm font-black text-violet-700"
+              className="min-touch rounded-full bg-white px-4 py-2 text-sm font-black text-violet-700"
             >
               Inicio
             </Link>
           </div>
 
-          <div className="mb-8 flex gap-2 overflow-x-auto pb-2 lg:hidden">
-            {dashboardViews.map((item) => (
-              <Link
-                key={item.id}
-                href={`/dashboard?view=${item.id}`}
-                className={`shrink-0 rounded-full px-4 py-2 text-sm font-black ${
-                  item.id === activeView
-                    ? "bg-violet-500 text-white"
-                    : "bg-white/10 text-white/70"
-                }`}
-              >
-                {item.label}
-              </Link>
-            ))}
-          </div>
-
           {children}
         </section>
       </div>
+
+      <nav
+        aria-label="Navegación principal móvil"
+        className="fixed inset-x-0 bottom-0 z-50 border-t border-white/10 bg-[#080b19]/95 px-2 pb-safe pt-2 shadow-2xl backdrop-blur lg:hidden"
+      >
+        <div className="mx-auto grid max-w-lg grid-cols-5 gap-1">
+          {dashboardViews
+            .filter((item) =>
+              ["inicio", "inventario", "compras", "consumo", "asistente"].includes(item.id),
+            )
+            .map((item) => {
+              const isActive = item.id === activeView;
+
+              return (
+                <Link
+                  key={item.id}
+                  href={`/dashboard?view=${item.id}`}
+                  className={`min-touch flex flex-col items-center justify-center gap-1 rounded-2xl px-2 py-2 text-[11px] font-black transition ${
+                    isActive
+                      ? "bg-violet-500 text-white"
+                      : "text-white/60 hover:bg-white/5 hover:text-white"
+                  }`}
+                >
+                  <span className="text-lg leading-none">{item.icon}</span>
+                  <span className="max-w-full truncate">{item.label}</span>
+                </Link>
+              );
+            })}
+        </div>
+      </nav>
     </main>
   );
 }
