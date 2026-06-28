@@ -63,6 +63,18 @@ export type HouseholdSummary = {
   healthScore: number;
 };
 
+export type HouseholdSettings = {
+  name: string;
+  owner: string;
+  monthlyBudget: number;
+  currency: string;
+  language: string;
+  budgetAlertThreshold: number;
+  favoriteStores: string[];
+  priorityCategories: string[];
+  purchaseFrequency: string;
+};
+
 export type AssistantMessage = {
   id: string;
   role: "user" | "assistant";
@@ -84,6 +96,8 @@ export type AssistantIntent =
 export type AssistantContext = {
   inventoryProducts: InventoryProduct[];
   purchases: Purchase[];
+  settings: HouseholdSettings;
+  members: HouseholdMember[];
   consumptionMetrics: {
     monthlySpend: number;
     budgetUsage: number;

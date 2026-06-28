@@ -1,4 +1,4 @@
-import { formatCurrency, householdSummary } from "@/lib/mock-home";
+import { formatCurrency } from "@/lib/mock-home";
 import {
   getBudgetUsage,
   getConsumptionAlerts,
@@ -9,6 +9,7 @@ import {
 } from "@/lib/services/consumption-service";
 import { getInventoryProducts } from "@/lib/services/inventory-service";
 import { getPurchases } from "@/lib/services/purchase-service";
+import { getHouseholdMembers, getHouseholdSettings } from "@/lib/services/settings-service";
 import type { AssistantContext, AssistantIntent } from "@/types/domain";
 
 export const assistantQuickActions = [
@@ -72,20 +73,25 @@ function formatProductList(products: Array<{ name: string }>) {
 export function getAssistantContext(): AssistantContext {
   const inventoryProducts = getInventoryProducts();
   const purchases = getPurchases();
+  const settings = getHouseholdSettings();
+  const members = getHouseholdMembers();
   const monthlySpend = getMonthlySpend(purchases);
-  const budgetUsage = getBudgetUsage(monthlySpend, householdSummary.monthlyBudget);
+  const budgetUsage = getBudgetUsage(monthlySpend, settings.monthlyBudget);
   const criticalProducts = getCriticalProducts(inventoryProducts);
   const topProducts = getTopPurchasedProducts(purchases);
   const spendByStore = getSpendByStore(purchases);
   const alerts = getConsumptionAlerts(
     purchases,
     inventoryProducts,
-    householdSummary.monthlyBudget,
+    settings.monthlyBudget,
+    settings.budgetAlertThreshold,
   );
 
   return {
     inventoryProducts,
     purchases,
+    settings,
+    members,
     consumptionMetrics: {
       monthlySpend,
       budgetUsage,
@@ -182,7 +188,7 @@ export function getCriticalProductsAnswer(context: AssistantContext) {
 
 export function getMonthlySpendAnswer(context: AssistantContext) {
   const { monthlySpend, budgetUsage } = context.consumptionMetrics;
-  const budget = householdSummary.monthlyBudget;
+  const budget = context.settings.monthlyBudget;
 
   if (budget <= 0) {
     return `Este mes llevas ${formatCurrency(monthlySpend)} gastados. No hay presupuesto configurado para calcular porcentaje.`;
@@ -242,7 +248,7 @@ export function getHomeSummaryAnswer(context: AssistantContext) {
   const criticalCount = context.consumptionMetrics.criticalProducts.length;
   const monthlySpend = formatCurrency(context.consumptionMetrics.monthlySpend);
 
-  return `Resumen del hogar: tienes ${productsCount} productos en inventario, ${criticalCount} requieren atención, ${purchasesCount} compras registradas y llevas ${monthlySpend} gastados este mes.`;
+  return `Resumen de ${context.settings.name}: ${context.settings.owner} tiene ${productsCount} productos en inventario, ${context.members.length} integrantes, ${criticalCount} requieren atención, ${purchasesCount} compras registradas y lleva ${monthlySpend} gastados este mes.`;
 }
 
 function getHelpAnswer() {

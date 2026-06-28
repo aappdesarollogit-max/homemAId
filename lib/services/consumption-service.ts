@@ -179,6 +179,7 @@ export function getConsumptionAlerts(
   purchases: Purchase[],
   inventoryProducts: InventoryProduct[],
   monthlyBudget: number,
+  budgetAlertThreshold = 80,
 ) {
   const monthlySpend = getMonthlySpend(purchases);
   const budgetUsage = getBudgetUsage(monthlySpend, monthlyBudget);
@@ -194,10 +195,10 @@ export function getConsumptionAlerts(
       description: `El gasto va en ${budgetUsage}% del presupuesto mensual.`,
       tone: "danger",
     });
-  } else if (budgetUsage >= 80) {
+  } else if (budgetUsage >= budgetAlertThreshold) {
     alerts.push({
       id: "budget-warning",
-      title: "Presupuesto sobre 80%",
+      title: `Presupuesto sobre ${budgetAlertThreshold}%`,
       description: `El gasto ya alcanzó ${budgetUsage}% del presupuesto mensual.`,
       tone: "warning",
     });

@@ -73,6 +73,7 @@ export const settingsSections = [
   { id: "hogar", label: "Hogar" },
   { id: "integrantes", label: "Integrantes" },
   { id: "presupuesto", label: "Presupuesto" },
+  { id: "preferencias", label: "Preferencias" },
 ];
 
 export function resolveView(view?: string): DashboardView {

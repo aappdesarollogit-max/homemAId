@@ -6,6 +6,7 @@ import { InventoryRow } from "@/components/dashboard/InventoryRows";
 import SectionHeader from "@/components/dashboard/SectionHeader";
 import { useInventory } from "@/hooks/useInventory";
 import { usePurchases } from "@/hooks/usePurchases";
+import { useSettings } from "@/hooks/useSettings";
 import {
   formatCurrency,
   householdSummary,
@@ -15,11 +16,18 @@ import {
 export default function OverviewView() {
   const { monthlySpend, isLoaded } = usePurchases();
   const { products, isLoaded: isInventoryLoaded } = useInventory("todos");
+  const { settings } = useSettings();
+  const activeSettings = settings ?? {
+    name: householdSummary.name,
+    owner: householdSummary.owner,
+    monthlyBudget: householdSummary.monthlyBudget,
+  };
   const currentMonthlySpend = isLoaded ? monthlySpend : householdSummary.monthlySpend;
   const currentInventoryProducts = isInventoryLoaded ? products : inventoryProducts;
-  const budgetUsage = Math.round(
-    (currentMonthlySpend / householdSummary.monthlyBudget) * 100,
-  );
+  const budgetUsage =
+    activeSettings.monthlyBudget > 0
+      ? Math.round((currentMonthlySpend / activeSettings.monthlyBudget) * 100)
+      : 0;
   const urgentProducts = currentInventoryProducts.filter((product) => product.status !== "ok");
   const firstUrgentProduct = urgentProducts[0] ?? currentInventoryProducts[0];
   const aiInsights = [
@@ -47,8 +55,8 @@ export default function OverviewView() {
   return (
     <>
       <SectionHeader
-        eyebrow={householdSummary.name}
-        title={`¡Hola, ${householdSummary.owner}!`}
+        eyebrow={activeSettings.name}
+        title={`Hola, ${activeSettings.owner}`}
         description="Aquí tienes el estado actualizado del hogar: inventario, compras, consumo y recomendaciones."
         action={
           <Link

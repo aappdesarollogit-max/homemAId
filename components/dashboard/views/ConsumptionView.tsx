@@ -8,9 +8,12 @@ import TopProducts from "@/components/dashboard/consumption/TopProducts";
 import WeeklyTrend from "@/components/dashboard/consumption/WeeklyTrend";
 import SectionHeader from "@/components/dashboard/SectionHeader";
 import { useConsumption } from "@/hooks/useConsumption";
+import { useSettings } from "@/hooks/useSettings";
 import { householdSummary } from "@/lib/mock-home";
 
 export default function ConsumptionView() {
+  const { settings } = useSettings();
+  const activeBudget = settings?.monthlyBudget ?? householdSummary.monthlyBudget;
   const {
     isLoaded,
     monthlySpend,
@@ -21,11 +24,13 @@ export default function ConsumptionView() {
     budgetUsage,
     alerts,
     criticalProducts,
-  } = useConsumption(householdSummary.monthlyBudget);
+  } = useConsumption(activeBudget, settings?.budgetAlertThreshold ?? 80);
   const visibleMonthlySpend = isLoaded ? monthlySpend : householdSummary.monthlySpend;
   const visibleBudgetUsage = isLoaded
     ? budgetUsage
-    : Math.round((householdSummary.monthlySpend / householdSummary.monthlyBudget) * 100);
+    : activeBudget > 0
+      ? Math.round((householdSummary.monthlySpend / activeBudget) * 100)
+      : 0;
 
   return (
     <>
@@ -39,7 +44,7 @@ export default function ConsumptionView() {
         <div className="space-y-6">
           <BudgetSummary
             monthlySpend={visibleMonthlySpend}
-            monthlyBudget={householdSummary.monthlyBudget}
+            monthlyBudget={activeBudget}
             budgetUsage={visibleBudgetUsage}
           />
           <WeeklyTrend points={weeklyTrend} />

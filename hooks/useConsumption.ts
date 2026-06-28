@@ -15,7 +15,7 @@ import { getInventoryProducts } from "@/lib/services/inventory-service";
 import { getPurchases } from "@/lib/services/purchase-service";
 import type { InventoryProduct, Purchase } from "@/types/domain";
 
-export function useConsumption(monthlyBudget: number) {
+export function useConsumption(monthlyBudget: number, budgetAlertThreshold = 80) {
   const [purchases, setPurchases] = useState<Purchase[]>([]);
   const [inventoryProducts, setInventoryProducts] = useState<InventoryProduct[]>([]);
   const [isLoaded, setIsLoaded] = useState(false);
@@ -35,7 +35,12 @@ export function useConsumption(monthlyBudget: number) {
     const topPurchasedProducts = getTopPurchasedProducts(purchases);
     const weeklyTrend = getWeeklySpendTrend(purchases);
     const budgetUsage = getBudgetUsage(monthlySpend, monthlyBudget);
-    const alerts = getConsumptionAlerts(purchases, inventoryProducts, monthlyBudget);
+    const alerts = getConsumptionAlerts(
+      purchases,
+      inventoryProducts,
+      monthlyBudget,
+      budgetAlertThreshold,
+    );
     const criticalProducts = getCriticalProducts(inventoryProducts);
 
     return {
@@ -51,5 +56,5 @@ export function useConsumption(monthlyBudget: number) {
       alerts,
       criticalProducts,
     };
-  }, [inventoryProducts, isLoaded, monthlyBudget, purchases]);
+  }, [budgetAlertThreshold, inventoryProducts, isLoaded, monthlyBudget, purchases]);
 }
