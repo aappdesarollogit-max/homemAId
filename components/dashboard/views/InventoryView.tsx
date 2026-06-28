@@ -101,6 +101,42 @@ export default function InventoryView({
 
   const attentionProducts = products.filter((product) => product.status !== "ok");
   const activeHouseholdName = settings?.name ?? householdSummary.name;
+  const isFormPanelOpen = panelMode === "create" || panelMode === "edit";
+
+  function closeFormPanel() {
+    setPanelMode("detail");
+  }
+
+  function renderProductForm(className = "") {
+    if (panelMode === "create") {
+      return (
+        <InventoryProductForm
+          title="Nuevo producto"
+          description="Crea un producto y se guardará en este navegador."
+          submitLabel="Guardar"
+          className={className}
+          onCancel={closeFormPanel}
+          onSubmit={handleCreate}
+        />
+      );
+    }
+
+    if (panelMode === "edit" && selectedProduct) {
+      return (
+        <InventoryProductForm
+          product={selectedProduct}
+          title="Editar producto"
+          description="Actualiza el stock, categoría y datos principales."
+          submitLabel="Guardar cambios"
+          className={className}
+          onCancel={closeFormPanel}
+          onSubmit={handleUpdate}
+        />
+      );
+    }
+
+    return null;
+  }
 
   return (
     <>
@@ -211,23 +247,8 @@ export default function InventoryView({
           )}
         </div>
 
-        {panelMode === "create" ? (
-          <InventoryProductForm
-            title="Nuevo producto"
-            description="Crea un producto y se guardará en este navegador."
-            submitLabel="Guardar"
-            onCancel={() => setPanelMode("detail")}
-            onSubmit={handleCreate}
-          />
-        ) : panelMode === "edit" && selectedProduct ? (
-          <InventoryProductForm
-            product={selectedProduct}
-            title="Editar producto"
-            description="Actualiza el stock, categoría y datos principales."
-            submitLabel="Guardar cambios"
-            onCancel={() => setPanelMode("detail")}
-            onSubmit={handleUpdate}
-          />
+        {isFormPanelOpen ? (
+          <div className="hidden xl:block">{renderProductForm()}</div>
         ) : (
           <InventoryProductDetail
             product={selectedProduct}
@@ -237,6 +258,24 @@ export default function InventoryView({
           />
         )}
       </div>
+
+      {isFormPanelOpen ? (
+        <div className="fixed inset-0 z-50 flex items-end bg-slate-950/75 px-3 pb-3 pt-16 backdrop-blur-sm xl:hidden">
+          <div className="relative w-full overflow-hidden rounded-[32px] shadow-2xl shadow-black/40">
+            <button
+              type="button"
+              onClick={closeFormPanel}
+              aria-label="Cerrar formulario"
+              className="absolute right-4 top-4 z-10 flex h-10 w-10 items-center justify-center rounded-full border border-slate-200 bg-white text-lg font-black text-slate-700 shadow-lg shadow-slate-950/10 transition active:scale-95"
+            >
+              x
+            </button>
+            {renderProductForm(
+              "h-[min(86dvh,720px)] max-h-none rounded-[32px] pb-[calc(1.25rem+env(safe-area-inset-bottom))] pt-6",
+            )}
+          </div>
+        </div>
+      ) : null}
     </>
   );
 }

@@ -9,6 +9,7 @@ type InventoryProductFormProps = {
   title: string;
   description: string;
   submitLabel: string;
+  className?: string;
   onCancel: () => void;
   onSubmit: (product: InventoryProductDraft) => void;
 };
@@ -37,6 +38,7 @@ export default function InventoryProductForm({
   title,
   description,
   submitLabel,
+  className = "",
   onCancel,
   onSubmit,
 }: InventoryProductFormProps) {
@@ -74,7 +76,10 @@ export default function InventoryProductForm({
   }
 
   return (
-    <form onSubmit={handleSubmit} className="max-h-[calc(100dvh-150px)] overflow-y-auto rounded-3xl bg-white p-5 text-slate-950">
+    <form
+      onSubmit={handleSubmit}
+      className={`max-h-[calc(100dvh-150px)] overflow-y-auto rounded-3xl bg-white p-5 text-slate-950 ${className}`}
+    >
       <p className="text-sm font-black uppercase tracking-[0.16em] text-violet-600">
         {title}
       </p>
@@ -169,7 +174,7 @@ export default function InventoryProductForm({
         </div>
       </div>
 
-      <div className="mt-5 grid gap-3 sm:grid-cols-2">
+      <div className="sticky bottom-0 -mx-5 mt-5 grid gap-3 bg-white px-5 pb-1 pt-3 sm:grid-cols-2">
         <button
           type="button"
           onClick={onCancel}
