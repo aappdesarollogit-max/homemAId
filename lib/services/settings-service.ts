@@ -1,4 +1,5 @@
 import { householdMembers, householdSummary } from "@/lib/mock-home";
+import { publishDomainEvent } from "@/core/platform/events/EventBus";
 import type { HouseholdMember, HouseholdSettings } from "@/types/domain";
 
 const SETTINGS_STORAGE_KEY = "homemaid.household.settings";
@@ -95,10 +96,18 @@ export function saveHouseholdSettings(settings: HouseholdSettings) {
 }
 
 export function updateHouseholdSettings(updates: HouseholdSettingsUpdate) {
-  return saveHouseholdSettings({
+  const settings = saveHouseholdSettings({
     ...getHouseholdSettings(),
     ...updates,
   });
+  publishDomainEvent({
+    type: "settings.updated",
+    source: "settings",
+    payload: {
+      updatedFields: Object.keys(updates),
+    },
+  });
+  return settings;
 }
 
 export function getHouseholdMembers() {

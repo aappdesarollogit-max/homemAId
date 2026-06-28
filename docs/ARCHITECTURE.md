@@ -6,6 +6,7 @@
 - `components/`: UI reutilizable.
 - `hooks/`: estado cliente por modulo.
 - `core/knowledge/`: plataforma de conocimiento interno del hogar.
+- `core/platform/`: Event Bus, Smart Input y preparacion de automatizaciones.
 - `lib/services/`: reglas de dominio y persistencia local.
 - `lib/ingestion/`: pipeline central de ingreso de datos.
 - `lib/intelligence/`: analisis local, predicciones, recomendaciones, alertas y score.
@@ -36,6 +37,22 @@ BETA 1 agrega `core/knowledge/` como base del conocimiento interno:
 - `KnowledgeRepository`: repositorio unico para leer, guardar, actualizar y refrescar conocimiento.
 
 `HomeIntelligenceEngine` consume esta capa y expone conocimiento a Overview, Consumo y Asistente.
+
+## BETA 2 - Platform Core
+
+BETA 2 agrega `core/platform/` como nucleo transversal:
+
+- `events/`: Event Bus tipado, logger, store y dispatcher.
+- `input/`: Smart Input Framework con adaptadores manual, texto, OCR, barcode, voz, Excel y API.
+- `automation/`: contratos para reglas futuras basadas en eventos.
+
+El flujo de compra manual queda:
+
+```text
+Purchase UI -> SmartInputFramework -> DataIngestionEngine -> PurchaseService / InventoryUpdater -> EventBus
+```
+
+Los modulos publican eventos, pero todavia no reaccionan automaticamente.
 
 ## PWA
 

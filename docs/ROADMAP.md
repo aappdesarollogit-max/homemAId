@@ -7,6 +7,7 @@
 - Data Ingestion Engine preparado para fuentes futuras.
 - Home Intelligence Engine local con score, recomendaciones, predicciones y alertas.
 - Household Knowledge Platform con grafo, timeline, memoria de patrones, confianza y explicaciones.
+- Platform Core con Event Bus, Smart Input y Automation Engine preparado.
 - PWA ready y experiencia mobile-first.
 
 ## Release Alpha
@@ -24,6 +25,15 @@
 - Exponer insights del hogar en Overview.
 - Exponer predicciones, confianza y explicaciones en Consumo.
 - Mantener OpenAI, Supabase, OCR, codigo de barras y Data Ingestion fuera del alcance funcional.
+
+## BETA 2 - Platform Core
+
+- Crear Event Bus local tipado.
+- Publicar eventos de compras, inventario, ajustes, asistente, inteligencia e input.
+- Crear Smart Input Framework y adaptadores futuros.
+- Enrutar compra manual por Smart Input y Data Ingestion.
+- Preparar Automation Engine sin ejecutar automatizaciones reales.
+- Documentar evolucion hacia OCR, OpenAI, Supabase y automatizaciones.
 
 ## Sprint 10 sugerido
 

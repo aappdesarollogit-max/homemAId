@@ -1,5 +1,6 @@
 import { generateHouseholdAlerts } from "@/lib/intelligence/AlertEngine";
 import { refreshKnowledge } from "@/core/knowledge/KnowledgeRepository";
+import { publishDomainEvent } from "@/core/platform/events/EventBus";
 import {
   calculateHouseholdHealthScore,
   getRiskLevel,
@@ -121,6 +122,16 @@ export function generateHomeIntelligence({
       recommendations: recommendationsWithKnowledge,
       alerts,
       healthScore,
+    });
+    publishDomainEvent({
+      type: "intelligence.refreshed",
+      source: "intelligence",
+      payload: {
+        healthScore,
+        riskLevel: summary.riskLevel,
+        recommendations: recommendationsWithKnowledge.length,
+        alerts: alerts.length,
+      },
     });
   }
 

@@ -21,3 +21,21 @@ Overview y Consumption no calculan reglas de inteligencia. Usan `useHomeIntellig
 ### IA futura subordinada a datos reales
 
 Cuando se conecte OpenAI, debera usar `HouseholdIntelligenceSummary` como contexto y Data Ingestion Engine para cualquier compra creada desde conversacion. No debe saltarse validacion, normalizacion ni actualizacion de inventario.
+
+## BETA 2 - Platform Core
+
+### Event Bus antes que acoplamiento directo
+
+Los modulos publican eventos de dominio en `core/platform/events/`. Esto prepara debugging, timeline, sincronizacion y automatizaciones sin hacer que inventario, compras, consumo o asistente dependan entre si.
+
+### Smart Input como entrada unica futura
+
+Las entradas manuales, texto, OCR, barcode, voz, Excel y API pasan por `SmartInputFramework`. Los adaptadores futuros solo normalizan; Data Ingestion Engine sigue siendo la autoridad para validar y aplicar compras.
+
+### Stubs seguros
+
+OCR, barcode, voz, Excel y API devuelven errores controlados. No hay implementacion falsa ni promesa funcional oculta.
+
+### Automation Engine desactivado
+
+Automation Engine queda preparado con reglas registrables y evaluables, pero sin acciones reales. Esto evita efectos secundarios mientras se valida el modelo de eventos.

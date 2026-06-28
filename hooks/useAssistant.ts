@@ -6,6 +6,7 @@ import {
   generateAssistantResponse,
   getAssistantContext,
 } from "@/lib/services/assistant-service";
+import { publishDomainEvent } from "@/core/platform/events/EventBus";
 import type { AssistantContext, AssistantMessage } from "@/types/domain";
 
 const ASSISTANT_HISTORY_KEY = "homemaid.assistant.messages";
@@ -105,6 +106,14 @@ export function useAssistant(selectedPrompt?: string) {
       generateAssistantResponse(cleanMessage, assistantContext),
     );
     setContext(assistantContext);
+    publishDomainEvent({
+      type: "assistant.message.sent",
+      source: "assistant",
+      payload: {
+        messageId: userMessage.id,
+        length: cleanMessage.length,
+      },
+    });
     setMessages((currentMessages) => {
       const nextMessages = [...currentMessages, userMessage, assistantMessage];
       persistMessages(nextMessages);

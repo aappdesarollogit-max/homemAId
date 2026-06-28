@@ -1,4 +1,5 @@
 import { inventoryProducts } from "@/lib/mock-home";
+import { publishDomainEvent } from "@/core/platform/events/EventBus";
 import type { InventoryProduct, ProductStatus } from "@/types/domain";
 
 const INVENTORY_STORAGE_KEY = "homemaid.inventory.products";
@@ -136,6 +137,15 @@ export function createInventoryProduct(product: InventoryProductDraft) {
     statusLabel: "Stock OK",
   });
   saveInventoryProducts([newProduct, ...products]);
+  publishDomainEvent({
+    type: "inventory.product.created",
+    source: "inventory",
+    payload: {
+      productId: newProduct.id,
+      name: newProduct.name,
+      category: newProduct.category,
+    },
+  });
 
   return newProduct;
 }
@@ -159,6 +169,17 @@ export function updateInventoryProduct(id: string, updates: InventoryProductUpda
   });
 
   saveInventoryProducts(nextProducts);
+  if (updatedProduct) {
+    publishDomainEvent({
+      type: "inventory.product.updated",
+      source: "inventory",
+      payload: {
+        productId: updatedProduct.id,
+        name: updatedProduct.name,
+        status: updatedProduct.status,
+      },
+    });
+  }
   return updatedProduct;
 }
 
@@ -166,13 +187,27 @@ export function deleteInventoryProduct(id: string) {
   const products = getInventoryProducts();
   const nextProducts = products.filter((product) => product.id !== id);
   saveInventoryProducts(nextProducts);
+  publishDomainEvent({
+    type: "inventory.product.deleted",
+    source: "inventory",
+    payload: { productId: id },
+  });
 
   return nextProducts;
 }
 
 export function markProductAsOpened(id: string, openedAt: string) {
-  return updateInventoryProduct(id, {
+  const updatedProduct = updateInventoryProduct(id, {
     isOpened: true,
     openedAt,
   });
+  publishDomainEvent({
+    type: "inventory.product.opened",
+    source: "inventory",
+    payload: {
+      productId: id,
+      openedAt,
+    },
+  });
+  return updatedProduct;
 }

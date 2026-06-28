@@ -3,6 +3,8 @@ import {
   getInventoryProducts,
   saveInventoryProducts,
 } from "@/lib/services/inventory-service";
+import { publishDomainEvent } from "@/core/platform/events/EventBus";
+import SmartInputFramework from "@/core/platform/input/SmartInputFramework";
 import DataIngestionEngine, {
   type NormalizedPurchase,
   type RawPurchaseInput,
@@ -226,14 +228,40 @@ export function createPurchase(purchaseInput: PurchaseInput) {
     },
     inventoryProvider: createInventoryUpdaterProvider(),
   });
-  const result = engine.receive(mapPurchaseInputToRawInputs(purchaseInput));
+  const smartInput = new SmartInputFramework({ ingestionEngine: engine });
+  const smartInputResult = smartInput.receiveInput({
+    type: "manual",
+    value: mapPurchaseInputToRawInputs(purchaseInput),
+    source: "purchase-service",
+  });
+  const result = smartInputResult.ingestionResult;
 
-  if (!result.ok || !result.purchase) {
+  if (!result?.ok || !result.purchase) {
     throw new Error(
-      result.validation.issues.map((issue) => issue.message).join(" ") ||
+      result?.validation.issues.map((issue) => issue.message).join(" ") ||
+        smartInputResult.error ||
         "No se pudo registrar la compra.",
     );
   }
+
+  publishDomainEvent({
+    type: "purchase.created",
+    source: "purchases",
+    payload: {
+      purchaseId: result.purchase.id,
+      store: result.purchase.store,
+      total: result.purchase.total,
+      items: result.purchase.items.length,
+    },
+  });
+  publishDomainEvent({
+    type: "consumption.updated",
+    source: "consumption",
+    payload: {
+      reason: "purchase.created",
+      purchaseId: result.purchase.id,
+    },
+  });
 
   return result.purchase;
 }
@@ -241,6 +269,19 @@ export function createPurchase(purchaseInput: PurchaseInput) {
 export function deletePurchase(id: string) {
   const nextPurchases = getPurchases().filter((purchase) => purchase.id !== id);
   savePurchases(nextPurchases);
+  publishDomainEvent({
+    type: "purchase.deleted",
+    source: "purchases",
+    payload: { purchaseId: id },
+  });
+  publishDomainEvent({
+    type: "consumption.updated",
+    source: "consumption",
+    payload: {
+      reason: "purchase.deleted",
+      purchaseId: id,
+    },
+  });
 
   return nextPurchases;
 }
