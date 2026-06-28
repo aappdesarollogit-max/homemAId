@@ -7,8 +7,21 @@
 - `hooks/`: estado cliente por modulo.
 - `lib/services/`: reglas de dominio y persistencia local.
 - `lib/ingestion/`: pipeline central de ingreso de datos.
+- `lib/intelligence/`: analisis local, predicciones, recomendaciones, alertas y score.
 - `lib/contracts/`: interfaces para proveedores futuros.
 - `types/`: contratos de dominio compartidos.
+
+## Release Alpha
+
+Release Alpha agrega Home Intelligence Foundation sin servicios externos. La nueva capa toma datos locales de inventario, compras, consumo, ajustes e integrantes, y devuelve `HouseholdIntelligenceSummary`.
+
+El flujo principal es:
+
+```text
+localStorage data -> HomeIntelligenceEngine -> hook -> Overview / Consumption / Assistant
+```
+
+La UI no calcula inteligencia directamente; consume el hook `useHomeIntelligence`.
 
 ## PWA
 

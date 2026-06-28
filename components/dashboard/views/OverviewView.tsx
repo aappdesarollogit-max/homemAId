@@ -4,6 +4,8 @@ import Link from "next/link";
 import MetricCard from "@/components/dashboard/MetricCard";
 import { InventoryRow } from "@/components/dashboard/InventoryRows";
 import SectionHeader from "@/components/dashboard/SectionHeader";
+import Badge from "@/components/ui/Badge";
+import { useHomeIntelligence } from "@/hooks/useHomeIntelligence";
 import { useInventory } from "@/hooks/useInventory";
 import { usePurchases } from "@/hooks/usePurchases";
 import { useSettings } from "@/hooks/useSettings";
@@ -17,6 +19,7 @@ export default function OverviewView() {
   const { monthlySpend, isLoaded } = usePurchases();
   const { products, isLoaded: isInventoryLoaded } = useInventory("todos");
   const { settings } = useSettings();
+  const { intelligenceSummary } = useHomeIntelligence();
   const activeSettings = settings ?? {
     name: householdSummary.name,
     owner: householdSummary.owner,
@@ -30,6 +33,11 @@ export default function OverviewView() {
       : 0;
   const urgentProducts = currentInventoryProducts.filter((product) => product.status !== "ok");
   const firstUrgentProduct = urgentProducts[0] ?? currentInventoryProducts[0];
+  const intelligenceScore = intelligenceSummary?.healthScore ?? householdSummary.healthScore;
+  const riskLabel = intelligenceSummary?.riskLevel ?? "low";
+  const topRecommendations = intelligenceSummary?.recommendations.slice(0, 2) ?? [];
+  const topAlerts = intelligenceSummary?.alerts.slice(0, 2) ?? [];
+  const nextAction = topRecommendations[0]?.actionLabel ?? "Actualizar datos";
   const aiInsights = [
     urgentProducts.length > 0
       ? {
@@ -93,11 +101,61 @@ export default function OverviewView() {
         <MetricCard
           icon="✓"
           label="Score del hogar"
-          value={`${householdSummary.healthScore}/100`}
-          note="Muy buen estado"
+          value={`${intelligenceScore}/100`}
+          note={`Riesgo ${riskLabel}`}
           tone="green"
         />
       </div>
+
+      <section className="mt-8 rounded-[32px] border border-white/10 bg-gradient-to-br from-violet-500/25 to-white/[0.04] p-6 shadow-2xl shadow-violet-950/20">
+        <div className="flex flex-col gap-5 lg:flex-row lg:items-start lg:justify-between">
+          <div>
+            <p className="text-xs font-black uppercase tracking-[0.18em] text-violet-200">
+              Inteligencia del hogar
+            </p>
+            <h2 className="mt-2 text-2xl font-black">Score {intelligenceScore}/100</h2>
+            <p className="mt-2 text-sm leading-relaxed text-white/60">
+              Riesgo actual: {riskLabel}. Próxima acción sugerida: {nextAction}.
+            </p>
+          </div>
+          <Badge tone={riskLabel === "critical" || riskLabel === "high" ? "red" : "green"}>
+            {riskLabel}
+          </Badge>
+        </div>
+
+        <div className="mt-5 grid gap-3 md:grid-cols-2">
+          <div className="rounded-2xl bg-black/20 p-4">
+            <p className="text-sm font-black text-violet-100">Recomendaciones</p>
+            <div className="mt-3 space-y-3">
+              {topRecommendations.length > 0 ? (
+                topRecommendations.map((recommendation) => (
+                  <p key={recommendation.id} className="text-sm leading-relaxed text-white/70">
+                    <span className="font-black text-white">{recommendation.title}:</span>{" "}
+                    {recommendation.description}
+                  </p>
+                ))
+              ) : (
+                <p className="text-sm text-white/55">No hay recomendaciones urgentes.</p>
+              )}
+            </div>
+          </div>
+          <div className="rounded-2xl bg-black/20 p-4">
+            <p className="text-sm font-black text-violet-100">Alertas principales</p>
+            <div className="mt-3 space-y-3">
+              {topAlerts.length > 0 ? (
+                topAlerts.map((alert) => (
+                  <p key={alert.id} className="text-sm leading-relaxed text-white/70">
+                    <span className="font-black text-white">{alert.title}:</span>{" "}
+                    {alert.description}
+                  </p>
+                ))
+              ) : (
+                <p className="text-sm text-white/55">No hay alertas inteligentes activas.</p>
+              )}
+            </div>
+          </div>
+        </div>
+      </section>
 
       <div className="mt-8 grid gap-6 xl:grid-cols-[1.1fr_0.9fr]">
         <section className="rounded-3xl border border-white/10 bg-white/[0.04] p-6">

@@ -1,3 +1,4 @@
+import { generateHomeIntelligence } from "@/lib/intelligence/HomeIntelligenceEngine";
 import { formatCurrency } from "@/lib/mock-home";
 import {
   getBudgetUsage,
@@ -34,19 +35,19 @@ export const assistantQuickActions = [
     message: "¿Qué compro más?",
   },
   {
-    id: "top-store",
-    label: "Tienda principal",
-    message: "¿Dónde gasté más?",
+    id: "intelligence",
+    label: "Inteligencia",
+    message: "¿Cuál es el estado inteligente del hogar?",
   },
   {
-    id: "alerts",
-    label: "Alertas",
-    message: "¿Qué alertas hay?",
+    id: "risks",
+    label: "Riesgos",
+    message: "¿Qué riesgos tengo?",
   },
   {
-    id: "home-summary",
-    label: "Resumen hogar",
-    message: "¿Cómo está mi hogar?",
+    id: "patterns",
+    label: "Patrones",
+    message: "¿Qué patrones detectaste?",
   },
 ];
 
@@ -86,12 +87,20 @@ export function getAssistantContext(): AssistantContext {
     settings.monthlyBudget,
     settings.budgetAlertThreshold,
   );
+  const intelligenceSummary = generateHomeIntelligence({
+    inventoryProducts,
+    purchases,
+    settings,
+    members,
+    persistMemory: true,
+  });
 
   return {
     inventoryProducts,
     purchases,
     settings,
     members,
+    intelligenceSummary,
     consumptionMetrics: {
       monthlySpend,
       budgetUsage,
@@ -108,11 +117,59 @@ export function resolveAssistantIntent(message: string): AssistantIntent {
 
   if (
     includesAny(normalizedMessage, [
+      "que va a pasar esta semana",
+      "esta semana",
+      "proximos dias",
+    ])
+  ) {
+    return "weekly_outlook";
+  }
+
+  if (
+    includesAny(normalizedMessage, [
+      "que me recomiendas",
+      "recomendaciones",
+      "recomienda",
+    ])
+  ) {
+    return "intelligence_recommendation";
+  }
+
+  if (
+    includesAny(normalizedMessage, [
+      "estado inteligente",
+      "inteligente del hogar",
+      "estado del hogar inteligente",
+    ])
+  ) {
+    return "intelligence_status";
+  }
+
+  if (includesAny(normalizedMessage, ["que riesgos tengo", "riesgos inteligentes"])) {
+    return "intelligence_risks";
+  }
+
+  if (includesAny(normalizedMessage, ["patrones detectaste", "que patrones", "patrones"])) {
+    return "intelligence_patterns";
+  }
+
+  if (includesAny(normalizedMessage, ["como puedo ahorrar", "ahorrar", "ahorro"])) {
+    return "savings_advice";
+  }
+
+  if (includesAny(normalizedMessage, ["que deberia revisar hoy", "revisar hoy"])) {
+    return "today_review";
+  }
+
+  if (
+    includesAny(normalizedMessage, [
       "por agotarse",
       "que me falta",
       "productos criticos",
       "stock bajo",
       "agotado",
+      "productos se acabaran pronto",
+      "se acabaran pronto",
     ])
   ) {
     return "critical_products";
@@ -233,7 +290,7 @@ export function getTopStoreAnswer(context: AssistantContext) {
 }
 
 export function getBudgetAlertAnswer(context: AssistantContext) {
-  const alerts = context.consumptionMetrics.alerts;
+  const alerts = context.intelligenceSummary?.alerts ?? context.consumptionMetrics.alerts;
 
   if (alerts.length === 0) {
     return "No veo alertas importantes por ahora. El consumo y el inventario se ven controlados.";
@@ -251,8 +308,102 @@ export function getHomeSummaryAnswer(context: AssistantContext) {
   return `Resumen de ${context.settings.name}: ${context.settings.owner} tiene ${productsCount} productos en inventario, ${context.members.length} integrantes, ${criticalCount} requieren atención, ${purchasesCount} compras registradas y lleva ${monthlySpend} gastados este mes.`;
 }
 
+export function getWeeklyOutlookAnswer(context: AssistantContext) {
+  const intelligence = context.intelligenceSummary;
+  if (!intelligence) return getHomeSummaryAnswer(context);
+
+  const predictions = intelligence.predictedStockOuts.slice(0, 3);
+  const recommendation = intelligence.recommendations[0];
+
+  if (predictions.length === 0 && !recommendation) {
+    return "Esta semana no veo riesgos urgentes. Mantén inventario y compras actualizados para mejorar las predicciones.";
+  }
+
+  const stockText =
+    predictions.length > 0
+      ? `Productos a vigilar: ${predictions.map((prediction) => prediction.productName).join(", ")}.`
+      : "No veo productos con agotamiento cercano.";
+  const actionText = recommendation ? ` Próxima acción sugerida: ${recommendation.title}.` : "";
+
+  return `${stockText}${actionText}`;
+}
+
+export function getIntelligenceRecommendationAnswer(context: AssistantContext) {
+  const recommendations = context.intelligenceSummary?.recommendations ?? [];
+
+  if (recommendations.length === 0) {
+    return "No tengo recomendaciones inteligentes suficientes todavía. Agrega compras e inventario para detectar mejores señales.";
+  }
+
+  return recommendations
+    .slice(0, 3)
+    .map((recommendation) => `${recommendation.title}: ${recommendation.description}`)
+    .join(" ");
+}
+
+export function getIntelligenceStatusAnswer(context: AssistantContext) {
+  const intelligence = context.intelligenceSummary;
+  if (!intelligence) return getHomeSummaryAnswer(context);
+
+  return `El estado inteligente del hogar tiene score ${intelligence.healthScore}/100 y riesgo ${intelligence.riskLevel}. Detecté ${intelligence.alerts.length} alerta${intelligence.alerts.length === 1 ? "" : "s"}, ${intelligence.patterns.length} patrón${intelligence.patterns.length === 1 ? "" : "es"} y ${intelligence.criticalProductsCount} producto${intelligence.criticalProductsCount === 1 ? "" : "s"} en atención.`;
+}
+
+export function getIntelligenceRisksAnswer(context: AssistantContext) {
+  const alerts = context.intelligenceSummary?.alerts ?? [];
+
+  if (alerts.length === 0) {
+    return "No detecté riesgos importantes por ahora. El hogar se ve controlado.";
+  }
+
+  return alerts
+    .slice(0, 4)
+    .map((alert) => `${alert.title}: ${alert.description}`)
+    .join(" ");
+}
+
+export function getIntelligencePatternsAnswer(context: AssistantContext) {
+  const patterns = context.intelligenceSummary?.patterns ?? [];
+
+  if (patterns.length === 0) {
+    return "Todavía no hay patrones fuertes. Con más compras registradas podré detectar hábitos y riesgos con mejor confianza.";
+  }
+
+  return patterns
+    .slice(0, 3)
+    .map((pattern) => `${pattern.title}: ${pattern.description}`)
+    .join(" ");
+}
+
+export function getSavingsAdviceAnswer(context: AssistantContext) {
+  const recommendations =
+    context.intelligenceSummary?.recommendations.filter(
+      (recommendation) =>
+        recommendation.impact === "ahorro" || recommendation.impact === "presupuesto",
+    ) ?? [];
+
+  if (recommendations.length === 0) {
+    return "Para ahorrar, empieza por mantener compras e inventario actualizados. Por ahora no veo una fuga clara de gasto.";
+  }
+
+  return recommendations
+    .slice(0, 3)
+    .map((recommendation) => recommendation.description)
+    .join(" ");
+}
+
+export function getTodayReviewAnswer(context: AssistantContext) {
+  const alert = context.intelligenceSummary?.alerts[0];
+  const recommendation = context.intelligenceSummary?.recommendations[0];
+
+  if (!alert && !recommendation) {
+    return "Hoy no veo tareas urgentes. Una buena revisión rápida sería confirmar stock de básicos y registrar cualquier compra pendiente.";
+  }
+
+  return `${alert ? `Revisa esto primero: ${alert.title}. ${alert.description}` : ""}${recommendation ? ` Luego: ${recommendation.description}` : ""}`;
+}
+
 function getHelpAnswer() {
-  return "Puedo ayudarte con productos críticos, gasto mensual, lista de compras sugerida, productos más comprados, tienda con mayor gasto, alertas y resumen del hogar.";
+  return "Puedo ayudarte con productos críticos, gasto mensual, lista de compras sugerida, productos más comprados, tienda con mayor gasto, alertas, resumen del hogar, predicciones, riesgos, patrones y recomendaciones inteligentes.";
 }
 
 export function generateAssistantResponse(message: string, context: AssistantContext) {
@@ -265,6 +416,13 @@ export function generateAssistantResponse(message: string, context: AssistantCon
   if (intent === "top_store") return getTopStoreAnswer(context);
   if (intent === "budget_alert") return getBudgetAlertAnswer(context);
   if (intent === "home_summary") return getHomeSummaryAnswer(context);
+  if (intent === "weekly_outlook") return getWeeklyOutlookAnswer(context);
+  if (intent === "intelligence_recommendation") return getIntelligenceRecommendationAnswer(context);
+  if (intent === "intelligence_status") return getIntelligenceStatusAnswer(context);
+  if (intent === "intelligence_risks") return getIntelligenceRisksAnswer(context);
+  if (intent === "intelligence_patterns") return getIntelligencePatternsAnswer(context);
+  if (intent === "savings_advice") return getSavingsAdviceAnswer(context);
+  if (intent === "today_review") return getTodayReviewAnswer(context);
   if (intent === "help") return getHelpAnswer();
 
   return `No estoy seguro de haber entendido. ${getHelpAnswer()}`;
