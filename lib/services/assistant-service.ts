@@ -269,3 +269,8 @@ export function generateAssistantResponse(message: string, context: AssistantCon
 
   return `No estoy seguro de haber entendido. ${getHelpAnswer()}`;
 }
+
+export function registerPurchaseFromConversation() {
+  // Future integration point: AI-parsed purchases must enter through DataIngestionEngine.
+  throw new Error("registerPurchaseFromConversation is reserved for a future AI ingestion sprint.");
+}

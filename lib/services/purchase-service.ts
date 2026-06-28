@@ -3,6 +3,11 @@ import {
   getInventoryProducts,
   saveInventoryProducts,
 } from "@/lib/services/inventory-service";
+import DataIngestionEngine, {
+  type NormalizedPurchase,
+  type RawPurchaseInput,
+} from "@/lib/ingestion/DataIngestionEngine";
+import type { InventoryUpdaterProvider } from "@/lib/ingestion/InventoryUpdater";
 import { purchases as mockPurchases } from "@/lib/mock-home";
 import type { InventoryProduct, Purchase, PurchaseItem } from "@/types/domain";
 
@@ -45,6 +50,28 @@ function todayLabel() {
     month: "short",
     year: "numeric",
   });
+}
+
+function createStoredPurchase(normalizedPurchase: NormalizedPurchase): Purchase {
+  const items = normalizedPurchase.items.map((item) => ({
+    productId: item.productId,
+    productName: item.productName,
+    quantity: item.quantity,
+    unit: item.unit,
+    price: item.price,
+  }));
+
+  const purchase: Purchase = {
+    id: generatePurchaseId(),
+    store: normalizedPurchase.store,
+    date: normalizedPurchase.date || todayLabel(),
+    total: calculatePurchaseTotal(items),
+    items,
+  };
+
+  savePurchases([purchase, ...getPurchases()]);
+
+  return purchase;
 }
 
 function normalizePurchase(purchase: Purchase): Purchase {
@@ -142,26 +169,73 @@ export function applyPurchaseToInventory(purchase: Purchase) {
   });
 }
 
-export function createPurchase(purchaseInput: PurchaseInput) {
-  const items = purchaseInput.items.map((item) => ({
-    productId: item.productId,
-    productName: item.productName.trim(),
-    quantity: Math.max(0, Number(item.quantity)),
-    unit: item.unit.trim(),
-    price: Math.max(0, Number(item.price)),
-  }));
-  const purchase: Purchase = {
-    id: generatePurchaseId(),
-    store: purchaseInput.store.trim(),
-    date: purchaseInput.date || todayLabel(),
-    total: calculatePurchaseTotal(items),
-    items,
+function createInventoryUpdaterProvider(): InventoryUpdaterProvider {
+  return {
+    findProductById(id) {
+      return getInventoryProducts().find((product) => product.id === id);
+    },
+    findProductByName(name) {
+      return getInventoryProducts().find(
+        (product) => normalizeText(product.name) === normalizeText(name),
+      );
+    },
+    increaseProductStock(id, quantity, unit) {
+      saveInventoryProducts(
+        getInventoryProducts().map((product) => {
+          if (product.id !== id) return product;
+
+          return {
+            ...product,
+            currentStock: product.currentStock + quantity,
+            unit: unit || product.unit,
+          };
+        }),
+      );
+    },
+    createProductFromPurchase(input) {
+      createInventoryProduct({
+        name: input.name,
+        category: input.category || "Despensa",
+        currentStock: input.quantity,
+        minimumStock: Math.max(1, Math.ceil(input.quantity * 0.25)),
+        unit: input.unit,
+        estimatedDaysLeft: 14,
+        icon: "□",
+      });
+    },
   };
+}
 
-  applyPurchaseToInventory(purchase);
-  savePurchases([purchase, ...getPurchases()]);
+function mapPurchaseInputToRawInputs(purchaseInput: PurchaseInput): RawPurchaseInput[] {
+  return purchaseInput.items.map((item) => ({
+    productId: item.productId,
+    producto: item.productName,
+    cantidad: item.quantity,
+    unidad: item.unit,
+    precio: item.price,
+    tienda: purchaseInput.store,
+    fecha: purchaseInput.date,
+    source: "manual",
+  }));
+}
 
-  return purchase;
+export function createPurchase(purchaseInput: PurchaseInput) {
+  const engine = new DataIngestionEngine({
+    purchaseProvider: {
+      createPurchase: createStoredPurchase,
+    },
+    inventoryProvider: createInventoryUpdaterProvider(),
+  });
+  const result = engine.receive(mapPurchaseInputToRawInputs(purchaseInput));
+
+  if (!result.ok || !result.purchase) {
+    throw new Error(
+      result.validation.issues.map((issue) => issue.message).join(" ") ||
+        "No se pudo registrar la compra.",
+    );
+  }
+
+  return result.purchase;
 }
 
 export function deletePurchase(id: string) {
