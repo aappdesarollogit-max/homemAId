@@ -14,8 +14,8 @@ export default function AppBottomSheet({
   if (!isOpen) return null;
 
   return (
-    <div className="fixed inset-0 z-50 flex items-end bg-slate-950/75 px-3 pb-3 pt-16 backdrop-blur-sm xl:hidden">
-      <div className="relative w-full overflow-hidden rounded-[32px] shadow-2xl shadow-black/40">
+    <div className="fixed inset-0 z-[70] flex items-end bg-slate-950/75 px-3 pb-3 pt-16 backdrop-blur-sm xl:hidden">
+      <div className="relative flex max-h-[calc(100dvh-96px)] w-full flex-col overflow-hidden rounded-[32px] shadow-2xl shadow-black/40">
         <button
           type="button"
           onClick={onClose}

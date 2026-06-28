@@ -130,38 +130,41 @@ export default function PurchaseForm({
 
   return (
     <aside
-      className={`max-h-[calc(100dvh-150px)] overflow-y-auto rounded-3xl bg-white p-5 text-slate-950 sm:p-6 ${className}`}
+      className={`flex max-h-[calc(100dvh-150px)] flex-col overflow-hidden rounded-3xl bg-white p-5 text-slate-950 sm:p-6 ${className}`}
     >
-      <p className="text-sm font-black uppercase tracking-[0.18em] text-violet-600">
-        Nueva compra
-      </p>
-      <h2 className="mt-3 text-2xl font-black">Registrar compra</h2>
-      <p className="mt-2 text-sm leading-relaxed text-slate-500">
-        Guarda la compra y actualiza el inventario de forma local.
-      </p>
+      <div className="shrink-0">
+        <p className="text-sm font-black uppercase tracking-[0.18em] text-violet-600">
+          Nueva compra
+        </p>
+        <h2 className="mt-3 text-2xl font-black">Registrar compra</h2>
+        <p className="mt-2 text-sm leading-relaxed text-slate-500">
+          Guarda la compra y actualiza el inventario de forma local.
+        </p>
+      </div>
 
-      <form onSubmit={handleSubmit} className="mt-6 space-y-4">
-        <label className="block">
-          <span className="mb-2 block text-xs font-black text-slate-600">Tienda</span>
-          <input
-            value={store}
-            onChange={(event) => setStore(event.target.value)}
-            className="min-touch w-full rounded-2xl border border-slate-200 bg-slate-50 px-4 py-3 text-sm font-bold outline-none focus:border-violet-400"
-          />
-          {errors.store ? <span className="mt-1 block text-xs font-bold text-red-500">{errors.store}</span> : null}
-        </label>
+      <form onSubmit={handleSubmit} className="mt-6 flex min-h-0 flex-1 flex-col">
+        <div className="min-h-0 flex-1 space-y-4 overflow-y-auto pr-1">
+          <label className="block">
+            <span className="mb-2 block text-xs font-black text-slate-600">Tienda</span>
+            <input
+              value={store}
+              onChange={(event) => setStore(event.target.value)}
+              className="min-touch w-full rounded-2xl border border-slate-200 bg-slate-50 px-4 py-3 text-sm font-bold outline-none focus:border-violet-400"
+            />
+            {errors.store ? <span className="mt-1 block text-xs font-bold text-red-500">{errors.store}</span> : null}
+          </label>
 
-        <div>
-          <div className="mb-2 flex items-center justify-between">
-            <span className="text-xs font-black text-slate-600">Productos</span>
-            <button
-              type="button"
-              onClick={() => setItems((currentItems) => [...currentItems, createEmptyItem()])}
-              className="min-touch rounded-xl px-2 text-xs font-black text-violet-600"
-            >
-              + Agregar
-            </button>
-          </div>
+          <div>
+            <div className="mb-2 flex items-center justify-between">
+              <span className="text-xs font-black text-slate-600">Productos</span>
+              <button
+                type="button"
+                onClick={() => setItems((currentItems) => [...currentItems, createEmptyItem()])}
+                className="min-touch rounded-xl px-2 text-xs font-black text-violet-600"
+              >
+                + Agregar
+              </button>
+            </div>
 
           <datalist id="inventory-products">
             {inventoryProducts.map((product) => (
@@ -259,12 +262,13 @@ export default function PurchaseForm({
           {errors.items ? <span className="mt-1 block text-xs font-bold text-red-500">{errors.items}</span> : null}
         </div>
 
-        <div className="flex items-center justify-between border-t border-slate-200 pt-5">
-          <span className="text-sm font-bold text-slate-500">Total</span>
-          <span className="text-2xl font-black text-violet-600">{formatCurrency(total)}</span>
         </div>
 
-        <div className="sticky bottom-0 -mx-5 grid gap-3 bg-white px-5 pb-1 pt-3 sm:-mx-6 sm:grid-cols-2 sm:px-6">
+        <div className="sticky bottom-0 z-20 -mx-5 mt-3 grid shrink-0 gap-3 bg-white px-5 pb-[calc(env(safe-area-inset-bottom)+88px)] pt-3 sm:-mx-6 sm:grid-cols-2 sm:px-6 xl:pb-1">
+          <div className="flex items-center justify-between border-b border-slate-200 pb-3 sm:col-span-2">
+            <span className="text-sm font-bold text-slate-500">Total</span>
+            <span className="text-2xl font-black text-violet-600">{formatCurrency(total)}</span>
+          </div>
           <button
             type="button"
             onClick={onCancel}

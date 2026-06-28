@@ -78,14 +78,16 @@ export default function InventoryProductForm({
   return (
     <form
       onSubmit={handleSubmit}
-      className={`max-h-[calc(100dvh-150px)] overflow-y-auto rounded-3xl bg-white p-5 text-slate-950 ${className}`}
+      className={`flex max-h-[calc(100dvh-150px)] flex-col overflow-hidden rounded-3xl bg-white p-5 text-slate-950 ${className}`}
     >
-      <p className="text-sm font-black uppercase tracking-[0.16em] text-violet-600">
-        {title}
-      </p>
-      <p className="mt-2 text-sm text-slate-500">{description}</p>
+      <div className="shrink-0">
+        <p className="text-sm font-black uppercase tracking-[0.16em] text-violet-600">
+          {title}
+        </p>
+        <p className="mt-2 text-sm text-slate-500">{description}</p>
+      </div>
 
-      <div className="mt-5 space-y-4">
+      <div className="mt-5 min-h-0 flex-1 space-y-4 overflow-y-auto pr-1">
         <label className="block">
           <span className="mb-2 block text-xs font-black text-slate-600">Nombre</span>
           <input
@@ -174,7 +176,7 @@ export default function InventoryProductForm({
         </div>
       </div>
 
-      <div className="sticky bottom-0 -mx-5 mt-5 grid gap-3 bg-white px-5 pb-1 pt-3 sm:grid-cols-2">
+      <div className="sticky bottom-0 z-20 -mx-5 mt-5 grid shrink-0 gap-3 bg-white px-5 pb-[calc(env(safe-area-inset-bottom)+88px)] pt-3 sm:grid-cols-2 xl:pb-1">
         <button
           type="button"
           onClick={onCancel}
