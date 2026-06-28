@@ -6,6 +6,7 @@ import PurchaseDetail from "@/components/dashboard/purchases/PurchaseDetail";
 import PurchaseForm from "@/components/dashboard/purchases/PurchaseForm";
 import PurchaseList from "@/components/dashboard/purchases/PurchaseList";
 import SectionHeader from "@/components/dashboard/SectionHeader";
+import AppBottomSheet from "@/components/ui/AppBottomSheet";
 import { usePurchases } from "@/hooks/usePurchases";
 import { getInventoryProducts } from "@/lib/services/inventory-service";
 import type { PurchaseInput } from "@/lib/services/purchase-service";
@@ -66,6 +67,21 @@ export default function PurchasesView({
     setPanelMode("detail");
   }
 
+  function closeFormPanel() {
+    setPanelMode("detail");
+  }
+
+  function renderPurchaseForm(className = "") {
+    return (
+      <PurchaseForm
+        inventoryProducts={inventoryProducts}
+        className={className}
+        onCancel={closeFormPanel}
+        onSubmit={handleCreate}
+      />
+    );
+  }
+
   return (
     <>
       <SectionHeader
@@ -104,15 +120,21 @@ export default function PurchasesView({
         </div>
 
         {panelMode === "create" ? (
-          <PurchaseForm
-            inventoryProducts={inventoryProducts}
-            onCancel={() => setPanelMode("detail")}
-            onSubmit={handleCreate}
-          />
+          <div className="hidden xl:block">{renderPurchaseForm()}</div>
         ) : (
           <PurchaseDetail purchase={selectedPurchase} onDelete={handleDelete} />
         )}
       </div>
+
+      <AppBottomSheet
+        isOpen={panelMode === "create"}
+        title="nueva compra"
+        onClose={closeFormPanel}
+      >
+        {renderPurchaseForm(
+          "h-[min(86dvh,720px)] max-h-none rounded-[32px] pb-[calc(1.25rem+env(safe-area-inset-bottom))] pt-6",
+        )}
+      </AppBottomSheet>
     </>
   );
 }

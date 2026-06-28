@@ -7,6 +7,7 @@ import type { InventoryProduct } from "@/types/domain";
 
 type PurchaseFormProps = {
   inventoryProducts: InventoryProduct[];
+  className?: string;
   onCancel: () => void;
   onSubmit: (purchase: PurchaseInput) => void;
 };
@@ -61,6 +62,7 @@ function validatePurchase(store: string, items: PurchaseFormItem[]) {
 
 export default function PurchaseForm({
   inventoryProducts,
+  className = "",
   onCancel,
   onSubmit,
 }: PurchaseFormProps) {
@@ -127,7 +129,9 @@ export default function PurchaseForm({
   }
 
   return (
-    <aside className="max-h-[calc(100dvh-150px)] overflow-y-auto rounded-3xl bg-white p-5 text-slate-950 sm:p-6">
+    <aside
+      className={`max-h-[calc(100dvh-150px)] overflow-y-auto rounded-3xl bg-white p-5 text-slate-950 sm:p-6 ${className}`}
+    >
       <p className="text-sm font-black uppercase tracking-[0.18em] text-violet-600">
         Nueva compra
       </p>
@@ -260,7 +264,7 @@ export default function PurchaseForm({
           <span className="text-2xl font-black text-violet-600">{formatCurrency(total)}</span>
         </div>
 
-        <div className="grid gap-3 sm:grid-cols-2">
+        <div className="sticky bottom-0 -mx-5 grid gap-3 bg-white px-5 pb-1 pt-3 sm:-mx-6 sm:grid-cols-2 sm:px-6">
           <button
             type="button"
             onClick={onCancel}
