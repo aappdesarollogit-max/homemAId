@@ -42,6 +42,16 @@ export default class SmartInputFramework {
         source: input.source,
       },
     });
+    if (input.type === "text" || typeof input.value === "string") {
+      eventBus.publish({
+        type: "text.input.received",
+        source: "input",
+        correlationId,
+        payload: {
+          length: String(input.value ?? "").length,
+        },
+      });
+    }
 
     const normalizedInput = this.normalizeInput(input);
 
@@ -55,6 +65,16 @@ export default class SmartInputFramework {
           error: normalizedInput.error,
         },
       });
+      if (normalizedInput.inputType === "text") {
+        eventBus.publish({
+          type: "text.input.failed",
+          source: "input",
+          correlationId,
+          payload: {
+            error: normalizedInput.error,
+          },
+        });
+      }
       return normalizedInput;
     }
 
@@ -67,6 +87,18 @@ export default class SmartInputFramework {
         items: normalizedInput.rawInputs.length,
       },
     });
+    if (normalizedInput.inputType === "text") {
+      eventBus.publish({
+        type: "text.input.parsed",
+        source: "input",
+        correlationId,
+        payload: {
+          products: normalizedInput.parsedPurchase?.products.length ?? normalizedInput.rawInputs.length,
+          confidence: normalizedInput.parsedPurchase?.confidence,
+          warnings: normalizedInput.parsedPurchase?.warnings.length ?? 0,
+        },
+      });
+    }
 
     return this.sendToDataIngestion(normalizedInput);
   }

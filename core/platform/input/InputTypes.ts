@@ -22,6 +22,7 @@ export type SmartInputNormalizeResult = {
   ok: boolean;
   inputType: SmartInputType;
   rawInputs: RawPurchaseInput[];
+  parsedPurchase?: ParsedPurchase;
   error?: string;
 };
 
@@ -34,6 +35,29 @@ export type InputAdapter = {
   canHandle(input: SmartInput): boolean;
   validate(input: SmartInput): SmartInputValidation;
   normalize(input: SmartInput): SmartInputNormalizeResult;
+};
+
+export type ParsedPurchaseProduct = {
+  productName: string;
+  normalizedName: string;
+  quantity: number;
+  unit: string;
+  category?: string;
+  productId?: string;
+  price?: number;
+  confidence: number;
+};
+
+export type ParsedPurchase = {
+  products: ParsedPurchaseProduct[];
+  store?: string;
+  totalAmount?: number;
+  date?: string;
+  observations?: string;
+  errors: string[];
+  warnings: string[];
+  confidence: number;
+  originalText: string;
 };
 
 export function unsupportedInput(type: SmartInputType, label: string): SmartInputNormalizeResult {

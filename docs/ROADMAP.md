@@ -8,6 +8,7 @@
 - Home Intelligence Engine local con score, recomendaciones, predicciones y alertas.
 - Household Knowledge Platform con grafo, timeline, memoria de patrones, confianza y explicaciones.
 - Platform Core con Event Bus, Smart Input y Automation Engine preparado.
+- Natural Language Input para compra rapida con previsualizacion.
 - PWA ready y experiencia mobile-first.
 
 ## Release Alpha
@@ -34,6 +35,15 @@
 - Enrutar compra manual por Smart Input y Data Ingestion.
 - Preparar Automation Engine sin ejecutar automatizaciones reales.
 - Documentar evolucion hacia OCR, OpenAI, Supabase y automatizaciones.
+
+## Release 2.1 - Natural Language Input
+
+- Crear parser local por reglas.
+- Resolver entidades contra inventario.
+- Agregar Compra rapida en Compras.
+- Confirmar compra por Smart Input y Data Ingestion.
+- Reutilizar parser desde el Asistente.
+- Registrar eventos `text.input.*`.
 
 ## Sprint 10 sugerido
 

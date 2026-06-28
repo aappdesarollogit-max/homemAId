@@ -97,6 +97,7 @@ export type AssistantIntent =
   | "intelligence_patterns"
   | "savings_advice"
   | "today_review"
+  | "text_purchase_preview"
   | "help"
   | "unknown";
 

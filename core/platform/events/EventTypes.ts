@@ -11,7 +11,11 @@ export type DomainEventType =
   | "intelligence.refreshed"
   | "input.received"
   | "input.normalized"
-  | "input.failed";
+  | "input.failed"
+  | "text.input.received"
+  | "text.input.parsed"
+  | "text.input.confirmed"
+  | "text.input.failed";
 
 export type DomainEventSource =
   | "inventory"

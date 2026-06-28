@@ -4,8 +4,10 @@ import { useEffect, useMemo, useState } from "react";
 import {
   calculatePurchaseTotal,
   createPurchase,
+  createPurchaseFromText,
   deletePurchase,
   getPurchases,
+  previewTextPurchase,
   type PurchaseInput,
 } from "@/lib/services/purchase-service";
 import type { Purchase } from "@/types/domain";
@@ -54,6 +56,16 @@ export function usePurchases() {
     return nextPurchases;
   }
 
+  function previewPurchaseText(text: string) {
+    return previewTextPurchase(text);
+  }
+
+  function addPurchaseFromText(text: string) {
+    const result = createPurchaseFromText(text);
+    setPurchases(getPurchases());
+    return result;
+  }
+
   return {
     purchases,
     filteredPurchases,
@@ -62,7 +74,9 @@ export function usePurchases() {
     setSearchTerm,
     monthlySpend,
     calculatePurchaseTotal,
+    previewPurchaseText,
     addPurchase,
+    addPurchaseFromText,
     removePurchase,
   };
 }

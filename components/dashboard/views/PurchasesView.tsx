@@ -5,6 +5,7 @@ import Link from "next/link";
 import PurchaseDetail from "@/components/dashboard/purchases/PurchaseDetail";
 import PurchaseForm from "@/components/dashboard/purchases/PurchaseForm";
 import PurchaseList from "@/components/dashboard/purchases/PurchaseList";
+import QuickPurchaseCard from "@/components/dashboard/purchases/QuickPurchaseCard";
 import SectionHeader from "@/components/dashboard/SectionHeader";
 import AppBottomSheet from "@/components/ui/AppBottomSheet";
 import { usePurchases } from "@/hooks/usePurchases";
@@ -29,6 +30,8 @@ export default function PurchasesView({
     searchTerm,
     setSearchTerm,
     addPurchase,
+    addPurchaseFromText,
+    previewPurchaseText,
     removePurchase,
   } = usePurchases();
   const [inventoryProducts, setInventoryProducts] = useState<InventoryProduct[]>([]);
@@ -53,6 +56,13 @@ export default function PurchasesView({
     const purchase = addPurchase(purchaseInput);
     setInventoryProducts(getInventoryProducts());
     setSelectedLocalPurchaseId(purchase.id);
+    setPanelMode("detail");
+  }
+
+  function handleCreateFromText(text: string) {
+    const result = addPurchaseFromText(text);
+    setInventoryProducts(getInventoryProducts());
+    setSelectedLocalPurchaseId(result.purchase.id);
     setPanelMode("detail");
   }
 
@@ -101,6 +111,10 @@ export default function PurchasesView({
 
       <div className="grid gap-6 xl:grid-cols-[1fr_380px]">
         <div>
+          <QuickPurchaseCard
+            onAnalyze={previewPurchaseText}
+            onConfirm={handleCreateFromText}
+          />
           {!isLoaded ? (
             <div className="rounded-3xl border border-white/10 bg-white/[0.04] p-6 text-sm font-bold text-white/55">
               Cargando compras...

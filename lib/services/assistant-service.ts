@@ -1,5 +1,6 @@
 import { generateHomeIntelligence } from "@/lib/intelligence/HomeIntelligenceEngine";
 import { formatCurrency } from "@/lib/mock-home";
+import { parseNaturalLanguagePurchase } from "@/core/platform/input/TextInputAdapter";
 import {
   getBudgetUsage,
   getConsumptionAlerts,
@@ -128,6 +129,18 @@ export function getAssistantContext(): AssistantContext {
 
 export function resolveAssistantIntent(message: string): AssistantIntent {
   const normalizedMessage = normalizeMessage(message);
+
+  if (
+    includesAny(normalizedMessage, [
+      "registra que compre",
+      "registra que compre",
+      "registre que compre",
+      "compre ",
+      "compré ",
+    ])
+  ) {
+    return "text_purchase_preview";
+  }
 
   if (
     includesAny(normalizedMessage, [
@@ -421,6 +434,26 @@ export function getTodayReviewAnswer(context: AssistantContext) {
   return `${alert ? `Revisa esto primero: ${alert.title}. ${alert.description}` : ""}${recommendation ? ` Luego: ${recommendation.description}` : ""}`;
 }
 
+export function getTextPurchasePreviewAnswer(message: string) {
+  const parsedPurchase = parseNaturalLanguagePurchase(message);
+
+  if (parsedPurchase.products.length === 0) {
+    return "Puedo ayudarte a registrar una compra desde texto, pero no detecté productos claros. Prueba con algo como: Compré 2 leches y 1 pan en Lider por $8.000.";
+  }
+
+  const products = parsedPurchase.products
+    .map((product) => `${product.quantity} ${product.unit} de ${product.productName}`)
+    .join(", ");
+  const store = parsedPurchase.store ?? "Entrada de texto";
+  const amount = parsedPurchase.totalAmount ? formatCurrency(parsedPurchase.totalAmount) : "$0";
+  const warnings =
+    parsedPurchase.warnings.length > 0
+      ? ` Advertencias: ${parsedPurchase.warnings.join(" ")}`
+      : "";
+
+  return `Detecté esta compra: ${products}. Tienda: ${store}. Monto: ${amount}. Confianza: ${parsedPurchase.confidence}%. Para guardarla, usa Compra rápida en Compras y confirma la previsualización.${warnings}`;
+}
+
 function getHelpAnswer() {
   return "Puedo ayudarte con productos críticos, gasto mensual, lista de compras sugerida, productos más comprados, tienda con mayor gasto, alertas, resumen del hogar, predicciones, riesgos, patrones y recomendaciones inteligentes.";
 }
@@ -442,6 +475,7 @@ export function generateAssistantResponse(message: string, context: AssistantCon
   if (intent === "intelligence_patterns") return getIntelligencePatternsAnswer(context);
   if (intent === "savings_advice") return getSavingsAdviceAnswer(context);
   if (intent === "today_review") return getTodayReviewAnswer(context);
+  if (intent === "text_purchase_preview") return getTextPurchasePreviewAnswer(message);
   if (intent === "help") return getHelpAnswer();
 
   return `No estoy seguro de haber entendido. ${getHelpAnswer()}`;

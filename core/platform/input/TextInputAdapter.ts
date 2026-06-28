@@ -1,43 +1,40 @@
+import EntityResolver from "@/core/platform/input/EntityResolver";
 import type {
   InputAdapter,
+  ParsedPurchase,
   SmartInput,
   SmartInputNormalizeResult,
 } from "@/core/platform/input/InputTypes";
+import TextParser from "@/core/platform/input/TextParser";
+import { getInventoryProducts } from "@/lib/services/inventory-service";
 
-function parseText(value: string) {
-  const storeMatch = value.match(/\b(?:en|del)\s+([a-záéíóúñ0-9\s]+)$/i);
-  const store = storeMatch?.[1]?.trim() || "Entrada de texto";
-  const cleanedValue = value
-    .replace(/^compr[ée]\s+/i, "")
-    .replace(/\s+en\s+[a-záéíóúñ0-9\s]+$/i, "")
-    .replace(/\s+y\s+/gi, ", ");
+function parsedPurchaseToRawInputs(parsedPurchase: ParsedPurchase) {
+  return parsedPurchase.products.map((product) => ({
+    productId: product.productId,
+    producto: product.productName,
+    cantidad: product.quantity,
+    unidad: product.unit,
+    precio: product.price ?? 0,
+    tienda: parsedPurchase.store ?? "Entrada de texto",
+    fecha: parsedPurchase.date,
+    categoria: product.category,
+    observaciones: parsedPurchase.observations,
+    source: "ai" as const,
+    confidence: product.confidence,
+  }));
+}
 
-  return cleanedValue
-    .split(",")
-    .map((chunk) => chunk.trim())
-    .filter(Boolean)
-    .map((chunk) => {
-      const match = chunk.match(/^(\d+(?:[.,]\d+)?)\s+(.+)$/);
-      const quantity = match ? Number(match[1].replace(",", ".")) : 1;
-      const productName = (match ? match[2] : chunk).trim();
+export function parseNaturalLanguagePurchase(text: string) {
+  const parser = new TextParser();
+  const resolver = new EntityResolver(getInventoryProducts());
 
-      return {
-        producto: productName,
-        cantidad: Number.isFinite(quantity) ? quantity : 1,
-        unidad: "unidad",
-        precio: 0,
-        tienda: store,
-        source: "ai" as const,
-        confidence: match ? 65 : 45,
-        observaciones: "Normalizado desde entrada de texto local.",
-      };
-    });
+  return resolver.resolve(parser.parse(text));
 }
 
 const TextInputAdapter: InputAdapter = {
   type: "text",
   canHandle(input: SmartInput) {
-    return typeof input.value === "string";
+    return input.type === "text" || typeof input.value === "string";
   },
   validate(input: SmartInput) {
     if (typeof input.value !== "string" || input.value.trim().length === 0) {
@@ -57,13 +54,17 @@ const TextInputAdapter: InputAdapter = {
       };
     }
 
-    const rawInputs = parseText(String(input.value));
+    const parsedPurchase = parseNaturalLanguagePurchase(String(input.value));
+    const rawInputs = parsedPurchaseToRawInputs(parsedPurchase);
 
     return {
-      ok: rawInputs.length > 0,
+      ok: parsedPurchase.errors.length === 0 && rawInputs.length > 0,
       inputType: "text",
       rawInputs,
-      error: rawInputs.length > 0 ? undefined : "No se detectaron productos en el texto.",
+      parsedPurchase,
+      error:
+        parsedPurchase.errors[0] ??
+        (rawInputs.length > 0 ? undefined : "No se detectaron productos en el texto."),
     };
   },
 };

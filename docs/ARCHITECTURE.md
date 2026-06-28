@@ -54,6 +54,17 @@ Purchase UI -> SmartInputFramework -> DataIngestionEngine -> PurchaseService / I
 
 Los modulos publican eventos, pero todavia no reaccionan automaticamente.
 
+## Release 2.1 - Natural Language Input
+
+La entrada en lenguaje natural vive sobre Platform Core:
+
+- `TextParser` extrae entidades desde texto libre.
+- `EntityResolver` normaliza productos y cruza contra inventario.
+- `TextInputAdapter` convierte texto en `RawPurchaseInput`.
+- `QuickPurchaseCard` muestra previsualizacion antes de confirmar.
+
+Al confirmar, la compra entra por `SmartInputFramework` y luego `DataIngestionEngine`, manteniendo el flujo unico de compras.
+
 ## PWA
 
 La PWA usa `public/manifest.webmanifest`, metadata en `app/layout.tsx`, safe areas en CSS global y navegacion inferior mobile en `DashboardShell`.

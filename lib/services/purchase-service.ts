@@ -5,6 +5,7 @@ import {
 } from "@/lib/services/inventory-service";
 import { publishDomainEvent } from "@/core/platform/events/EventBus";
 import SmartInputFramework from "@/core/platform/input/SmartInputFramework";
+import { parseNaturalLanguagePurchase } from "@/core/platform/input/TextInputAdapter";
 import DataIngestionEngine, {
   type NormalizedPurchase,
   type RawPurchaseInput,
@@ -264,6 +265,68 @@ export function createPurchase(purchaseInput: PurchaseInput) {
   });
 
   return result.purchase;
+}
+
+export function previewTextPurchase(text: string) {
+  return parseNaturalLanguagePurchase(text);
+}
+
+export function createPurchaseFromText(text: string) {
+  const engine = new DataIngestionEngine({
+    purchaseProvider: {
+      createPurchase: createStoredPurchase,
+    },
+    inventoryProvider: createInventoryUpdaterProvider(),
+  });
+  const smartInput = new SmartInputFramework({ ingestionEngine: engine });
+  const smartInputResult = smartInput.receiveInput({
+    type: "text",
+    value: text,
+    source: "purchase-service",
+  });
+  const result = smartInputResult.ingestionResult;
+
+  if (!result?.ok || !result.purchase) {
+    throw new Error(
+      result?.validation.issues.map((issue) => issue.message).join(" ") ||
+        smartInputResult.error ||
+        "No se pudo registrar la compra desde texto.",
+    );
+  }
+
+  publishDomainEvent({
+    type: "text.input.confirmed",
+    source: "input",
+    payload: {
+      purchaseId: result.purchase.id,
+      products: result.purchase.items.length,
+      confidence: smartInputResult.parsedPurchase?.confidence,
+    },
+  });
+  publishDomainEvent({
+    type: "purchase.created",
+    source: "purchases",
+    payload: {
+      purchaseId: result.purchase.id,
+      store: result.purchase.store,
+      total: result.purchase.total,
+      items: result.purchase.items.length,
+      inputType: "text",
+    },
+  });
+  publishDomainEvent({
+    type: "consumption.updated",
+    source: "consumption",
+    payload: {
+      reason: "text.input.confirmed",
+      purchaseId: result.purchase.id,
+    },
+  });
+
+  return {
+    purchase: result.purchase,
+    parsedPurchase: smartInputResult.parsedPurchase,
+  };
 }
 
 export function deletePurchase(id: string) {
