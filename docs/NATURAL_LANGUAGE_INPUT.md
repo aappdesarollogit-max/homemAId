@@ -35,6 +35,17 @@ Texto libre
 - `Compré arroz, azúcar, aceite y huevos.`
 - `En Jumbo compré 3 yogures por $5.400.`
 
+## Pruebas Manuales Recomendadas
+
+- `Compré 2 leches y un pan en Lider por $25.000`
+  - Esperado: Leche entera o Leche x2 unidades, Pan x1 unidad, tienda Lider, monto 25000.
+- `Compré arroz, azúcar, aceite y huevos`
+  - Esperado: cuatro productos limpios, cantidad 1 por defecto.
+- `En Jumbo compré 3 yogures por $5.400`
+  - Esperado: Yogurt x3 unidades, tienda Jumbo, monto 5400.
+- `Hoy gasté $12.990 en mascotas`
+  - Esperado: monto 12990, tienda/categoría textual mascotas, warning si no hay producto claro.
+
 ## Previsualización
 
 Antes de guardar, la UI muestra:

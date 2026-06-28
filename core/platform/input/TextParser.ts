@@ -15,6 +15,9 @@ const NUMBER_WORDS = new Map<string, number>([
   ["diez", 10],
 ]);
 
+const LEADING_VERBS =
+  /\b(compré|compre|compramos|compré hoy|hoy compré|gasté|gaste|gastamos|registré|registre|registra que|registra)\b/gi;
+
 function normalizeText(value: string) {
   return value
     .toLowerCase()
@@ -56,23 +59,24 @@ function parseQuantity(value?: string) {
   return NUMBER_WORDS.get(normalized) ?? 1;
 }
 
-function stripNoise(text: string) {
-  return text
-    .replace(/\$\s?[\d.]+(?:,\d+)?/g, "")
-    .replace(/\b(hoy|ayer)\b/gi, "")
-    .replace(/\b(gaste|gasté|compre|compré|registre|registra|que)\b/gi, "")
-    .replace(/\b(en|del)\s+[a-zA-ZáéíóúÁÉÍÓÚñÑ0-9\s]+?(?:[.,]|$)/gi, "")
-    .replace(/\bpor\b/gi, "")
-    .replace(/[.]/g, "")
-    .replace(/\s+y\s+/gi, ", ")
-    .trim();
+function removeStoreSegment(text: string) {
+  return text.replace(
+    /\b(?:en|del)\s+[a-zA-ZáéíóúÁÉÍÓÚñÑ0-9\s]+?(?=\s+por\s+\$|\s*$|[.,])/gi,
+    "",
+  );
 }
 
-function singularize(value: string) {
-  const normalized = value.trim();
-  if (normalized.length > 4 && normalized.endsWith("es")) return normalized.slice(0, -2);
-  if (normalized.length > 3 && normalized.endsWith("s")) return normalized.slice(0, -1);
-  return normalized;
+function stripNoise(text: string) {
+  return removeStoreSegment(text)
+    .replace(/\$\s?[\d.]+(?:,\d+)?/g, "")
+    .replace(LEADING_VERBS, "")
+    .replace(/\b(hoy|ayer)\b/gi, "")
+    .replace(/\b(por|en|del)\b/gi, "")
+    .replace(/[.]/g, "")
+    .replace(/\s+y\s+/gi, ", ")
+    .replace(/\s{2,}/g, " ")
+    .replace(/^,\s*/, "")
+    .trim();
 }
 
 function parseProducts(text: string, totalAmount?: number): ParsedPurchaseProduct[] {
@@ -86,16 +90,21 @@ function parseProducts(text: string, totalAmount?: number): ParsedPurchaseProduc
 
   const products = chunks
     .map((chunk) => {
-      const match = chunk.match(/^(\d+(?:[.,]\d+)?|un|una|uno|dos|tres|cuatro|cinco|seis|siete|ocho|nueve|diez)\s+(.+)$/i);
+      const match = chunk.match(
+        /^(\d+(?:[.,]\d+)?|un|una|uno|dos|tres|cuatro|cinco|seis|siete|ocho|nueve|diez)\s+(.+)$/i,
+      );
       const quantity = parseQuantity(match?.[1]);
-      const productName = singularize((match?.[2] ?? chunk).trim());
+      const productName = (match?.[2] ?? chunk)
+        .replace(LEADING_VERBS, "")
+        .replace(/\b(hoy|ayer)\b/gi, "")
+        .trim();
 
       return {
         productName,
         normalizedName: productName,
         quantity,
-        unit: "unidad",
-        confidence: match ? 72 : 58,
+        unit: "unidades",
+        confidence: match ? 76 : 60,
       };
     })
     .filter((product) => product.productName.length > 0);

@@ -4,7 +4,7 @@ import type { InventoryProduct } from "@/types/domain";
 const PRODUCT_ALIASES = new Map<string, string>([
   ["lechita", "leche"],
   ["leches", "leche"],
-  ["huevo", "huevos"],
+  ["huevos", "huevo"],
   ["yogur", "yogurt"],
   ["yogures", "yogurt"],
   ["panes", "pan"],
@@ -14,7 +14,7 @@ const CATEGORY_HINTS = new Map<string, string>([
   ["leche", "Lácteos"],
   ["yogurt", "Lácteos"],
   ["queso", "Lácteos"],
-  ["huevos", "Despensa"],
+  ["huevo", "Despensa"],
   ["arroz", "Despensa"],
   ["azucar", "Despensa"],
   ["aceite", "Despensa"],
@@ -45,7 +45,10 @@ export default class EntityResolver {
       const normalizedName = normalize(product.productName);
       const aliasName = PRODUCT_ALIASES.get(normalizedName) ?? normalizedName;
       const existingProduct = this.inventoryProducts.find(
-        (inventoryProduct) => normalize(inventoryProduct.name) === aliasName,
+        (inventoryProduct) =>
+          normalize(inventoryProduct.name) === aliasName ||
+          normalize(inventoryProduct.name).includes(aliasName) ||
+          aliasName.includes(normalize(inventoryProduct.name)),
       );
       const category =
         existingProduct?.category ?? CATEGORY_HINTS.get(aliasName) ?? product.category;
