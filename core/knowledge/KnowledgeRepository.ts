@@ -3,6 +3,7 @@ import { buildKnowledgeExplanations } from "@/core/knowledge/ExplanationEngine";
 import { buildHouseholdTimeline } from "@/core/knowledge/HouseholdTimeline";
 import { buildKnowledgeGraph } from "@/core/knowledge/KnowledgeGraph";
 import { buildPatternMemory } from "@/core/knowledge/PatternMemory";
+import { readStorageJson, writeStorageJson } from "@/lib/safe-storage";
 import type {
   HouseholdAlert,
   HouseholdKnowledge,
@@ -16,10 +17,6 @@ import type {
 } from "@/types/domain";
 
 const KNOWLEDGE_STORAGE_KEY = "homemaid.household.knowledge";
-
-function canUseLocalStorage() {
-  return typeof window !== "undefined" && Boolean(window.localStorage);
-}
 
 function emptyKnowledge(): HouseholdKnowledge {
   return {
@@ -37,19 +34,10 @@ function emptyKnowledge(): HouseholdKnowledge {
 }
 
 export function getKnowledge(): HouseholdKnowledge {
-  if (!canUseLocalStorage()) return emptyKnowledge();
-
-  const storedKnowledge = window.localStorage.getItem(KNOWLEDGE_STORAGE_KEY);
-  if (!storedKnowledge) return emptyKnowledge();
-
-  try {
-    return {
-      ...emptyKnowledge(),
-      ...(JSON.parse(storedKnowledge) as HouseholdKnowledge),
-    };
-  } catch {
-    return emptyKnowledge();
-  }
+  return {
+    ...emptyKnowledge(),
+    ...readStorageJson<Partial<HouseholdKnowledge>>(KNOWLEDGE_STORAGE_KEY, {}),
+  };
 }
 
 export function saveKnowledge(knowledge: HouseholdKnowledge) {
@@ -61,9 +49,7 @@ export function saveKnowledge(knowledge: HouseholdKnowledge) {
     updatedAt: new Date().toISOString(),
   };
 
-  if (canUseLocalStorage()) {
-    window.localStorage.setItem(KNOWLEDGE_STORAGE_KEY, JSON.stringify(nextKnowledge));
-  }
+  writeStorageJson(KNOWLEDGE_STORAGE_KEY, nextKnowledge);
 
   return nextKnowledge;
 }

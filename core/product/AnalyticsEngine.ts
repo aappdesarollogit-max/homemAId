@@ -5,6 +5,7 @@ import {
 } from "@/core/product/ProductStorage";
 import type { AnalyticsEvent } from "@/core/product/ProductTypes";
 import { getEventBus } from "@/core/platform/events/EventBus";
+import { getReleaseLabel } from "@/lib/release";
 
 export type AnalyticsEventDraft = Omit<AnalyticsEvent, "id" | "fecha"> & {
   fecha?: string;
@@ -64,7 +65,7 @@ export default class AnalyticsEngine {
         this.getEventsByType("asistente.usado").length +
         platformEvents.filter((event) => event.type === "assistant.message.sent").length,
       usuariosAlpha: new Set(snapshot.feedback.map((feedback) => feedback.usuario)).size,
-      version: "Alpha 1.1",
+      version: getReleaseLabel(),
     };
   }
 }

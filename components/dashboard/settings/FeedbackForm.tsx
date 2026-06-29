@@ -4,6 +4,7 @@ import { useState } from "react";
 import AnalyticsEngine from "@/core/product/AnalyticsEngine";
 import FeedbackEngine from "@/core/product/FeedbackEngine";
 import type { FeedbackType, ProductPriority } from "@/core/product/ProductTypes";
+import { getReleaseLabel } from "@/lib/release";
 
 const feedbackTypes: FeedbackType[] = [
   "BUG",
@@ -40,7 +41,7 @@ export default function FeedbackForm() {
 
     feedbackEngine.createFeedback({
       ...formValues,
-      version: "Alpha 1.1",
+      version: getReleaseLabel(),
     });
     analyticsEngine.track({
       tipo: "feedback.enviado",
@@ -142,17 +143,9 @@ export default function FeedbackForm() {
       </label>
 
       <div className="mt-4 grid gap-4 sm:grid-cols-2">
-        <input
-          value={formValues.captura}
-          onChange={(event) =>
-            setFormValues((currentValues) => ({
-              ...currentValues,
-              captura: event.target.value,
-            }))
-          }
-          placeholder="Adjuntar captura (placeholder)"
-          className="rounded-2xl border border-slate-200 bg-slate-50 px-4 py-3 text-sm font-bold outline-none focus:border-violet-400"
-        />
+        <p className="rounded-2xl border border-dashed border-slate-300 bg-slate-50 px-4 py-3 text-sm font-bold text-slate-500">
+          Adjuntar captura estará disponible próximamente.
+        </p>
         <input
           value={formValues.logs}
           onChange={(event) =>

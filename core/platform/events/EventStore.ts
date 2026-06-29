@@ -1,11 +1,8 @@
 import type { DomainEvent, DomainEventType } from "@/core/platform/events/EventTypes";
+import { readStorageJson, writeStorageJson } from "@/lib/safe-storage";
 
 const EVENT_STORAGE_KEY = "homemaid.platform.events";
 const MAX_EVENTS = 200;
-
-function canUseLocalStorage() {
-  return typeof window !== "undefined" && Boolean(window.localStorage);
-}
 
 export default class EventStore {
   private events: DomainEvent[] = [];
@@ -42,21 +39,10 @@ export default class EventStore {
   }
 
   private readStoredEvents() {
-    if (!canUseLocalStorage()) return [];
-
-    const storedEvents = window.localStorage.getItem(EVENT_STORAGE_KEY);
-    if (!storedEvents) return [];
-
-    try {
-      return JSON.parse(storedEvents) as DomainEvent[];
-    } catch {
-      return [];
-    }
+    return readStorageJson<DomainEvent[]>(EVENT_STORAGE_KEY, []);
   }
 
   private persist() {
-    if (canUseLocalStorage()) {
-      window.localStorage.setItem(EVENT_STORAGE_KEY, JSON.stringify(this.events));
-    }
+    writeStorageJson(EVENT_STORAGE_KEY, this.events);
   }
 }

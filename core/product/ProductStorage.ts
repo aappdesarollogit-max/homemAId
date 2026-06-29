@@ -6,12 +6,9 @@ import type {
   ProductDecision,
   ProductSnapshot,
 } from "@/core/product/ProductTypes";
+import { readStorageJson, writeStorageJson } from "@/lib/safe-storage";
 
 const PRODUCT_STORAGE_KEY = "homemaid.product.intelligence";
-
-function canUseLocalStorage() {
-  return typeof window !== "undefined" && Boolean(window.localStorage);
-}
 
 export function createProductId(prefix: string) {
   const suffix =
@@ -33,19 +30,10 @@ export function emptyProductSnapshot(): ProductSnapshot {
 }
 
 export function getProductSnapshot(): ProductSnapshot {
-  if (!canUseLocalStorage()) return emptyProductSnapshot();
-
-  const storedSnapshot = window.localStorage.getItem(PRODUCT_STORAGE_KEY);
-  if (!storedSnapshot) return emptyProductSnapshot();
-
-  try {
-    return {
-      ...emptyProductSnapshot(),
-      ...(JSON.parse(storedSnapshot) as ProductSnapshot),
-    };
-  } catch {
-    return emptyProductSnapshot();
-  }
+  return {
+    ...emptyProductSnapshot(),
+    ...readStorageJson<Partial<ProductSnapshot>>(PRODUCT_STORAGE_KEY, {}),
+  };
 }
 
 export function saveProductSnapshot(snapshot: ProductSnapshot) {
@@ -57,9 +45,7 @@ export function saveProductSnapshot(snapshot: ProductSnapshot) {
     analytics: snapshot.analytics.slice(0, 1000),
   };
 
-  if (canUseLocalStorage()) {
-    window.localStorage.setItem(PRODUCT_STORAGE_KEY, JSON.stringify(nextSnapshot));
-  }
+  writeStorageJson(PRODUCT_STORAGE_KEY, nextSnapshot);
 
   return nextSnapshot;
 }

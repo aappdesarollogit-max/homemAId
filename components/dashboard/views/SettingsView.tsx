@@ -1,6 +1,7 @@
 "use client";
 
 import Link from "next/link";
+import AlphaNotice from "@/components/dashboard/AlphaNotice";
 import BudgetSettings from "@/components/dashboard/settings/BudgetSettings";
 import FeedbackForm from "@/components/dashboard/settings/FeedbackForm";
 import HouseholdForm from "@/components/dashboard/settings/HouseholdForm";
@@ -13,6 +14,7 @@ import { usePurchases } from "@/hooks/usePurchases";
 import { useSettings } from "@/hooks/useSettings";
 import { settingsSections } from "@/lib/dashboard-utils";
 import { householdSummary } from "@/lib/mock-home";
+import { releaseInfo } from "@/lib/release";
 
 export default function SettingsView({
   activeSettingsSection,
@@ -57,6 +59,37 @@ export default function SettingsView({
           </button>
         }
       />
+
+      <AlphaNotice className="mb-4" />
+
+      <div className="mb-6 grid gap-3 rounded-3xl border border-white/10 bg-white/[0.04] p-4 text-sm text-white/70 sm:grid-cols-2 lg:grid-cols-4">
+        <div>
+          <p className="text-xs font-black uppercase tracking-[0.16em] text-white/40">
+            Version
+          </p>
+          <p className="mt-1 font-black text-white">{releaseInfo.appVersion}</p>
+        </div>
+        <div>
+          <p className="text-xs font-black uppercase tracking-[0.16em] text-white/40">
+            Release
+          </p>
+          <p className="mt-1 font-black text-white">{releaseInfo.releaseName}</p>
+        </div>
+        <div>
+          <p className="text-xs font-black uppercase tracking-[0.16em] text-white/40">
+            Build
+          </p>
+          <p className="mt-1 font-black text-white">{releaseInfo.buildDate}</p>
+        </div>
+        <div>
+          <p className="text-xs font-black uppercase tracking-[0.16em] text-white/40">
+            Commit
+          </p>
+          <p className="mt-1 truncate font-black text-white">
+            {releaseInfo.gitCommit?.slice(0, 7) ?? "No disponible"}
+          </p>
+        </div>
+      </div>
 
       <div className="mb-6 flex flex-wrap gap-2">
         {settingsSections.map((section) => (

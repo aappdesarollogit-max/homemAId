@@ -12,6 +12,7 @@ import DataIngestionEngine, {
 } from "@/lib/ingestion/DataIngestionEngine";
 import type { InventoryUpdaterProvider } from "@/lib/ingestion/InventoryUpdater";
 import { purchases as mockPurchases } from "@/lib/mock-home";
+import { readStorageJson, writeStorageJson } from "@/lib/safe-storage";
 import type { InventoryProduct, Purchase, PurchaseItem } from "@/types/domain";
 
 const PURCHASE_STORAGE_KEY = "homemaid.purchases";
@@ -29,10 +30,6 @@ export type PurchaseItemInput = {
   unit: string;
   price: number;
 };
-
-function canUseLocalStorage() {
-  return typeof window !== "undefined" && Boolean(window.localStorage);
-}
 
 function generatePurchaseId() {
   const suffix =
@@ -97,32 +94,16 @@ export function calculatePurchaseTotal(items: Array<Pick<PurchaseItem, "price">>
 }
 
 export function getPurchases() {
-  if (!canUseLocalStorage()) return mockPurchases.map(normalizePurchase);
-
-  const storedPurchases = window.localStorage.getItem(PURCHASE_STORAGE_KEY);
-
-  if (!storedPurchases) {
-    const initialPurchases = mockPurchases.map(normalizePurchase);
-    savePurchases(initialPurchases);
-    return initialPurchases;
-  }
-
-  try {
-    const parsedPurchases = JSON.parse(storedPurchases) as Purchase[];
-    return parsedPurchases.map(normalizePurchase);
-  } catch {
-    const initialPurchases = mockPurchases.map(normalizePurchase);
-    savePurchases(initialPurchases);
-    return initialPurchases;
-  }
+  return readStorageJson<Purchase[]>(
+    PURCHASE_STORAGE_KEY,
+    mockPurchases.map(normalizePurchase),
+  ).map(normalizePurchase);
 }
 
 export function savePurchases(purchases: Purchase[]) {
   const normalizedPurchases = purchases.map(normalizePurchase);
 
-  if (canUseLocalStorage()) {
-    window.localStorage.setItem(PURCHASE_STORAGE_KEY, JSON.stringify(normalizedPurchases));
-  }
+  writeStorageJson(PURCHASE_STORAGE_KEY, normalizedPurchases);
 
   return normalizedPurchases;
 }

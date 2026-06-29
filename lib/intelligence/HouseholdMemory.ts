@@ -4,12 +4,9 @@ import type {
   HouseholdPattern,
   HouseholdRecommendation,
 } from "@/types/domain";
+import { readStorageJson, writeStorageJson } from "@/lib/safe-storage";
 
 const MEMORY_STORAGE_KEY = "homemaid.household.intelligence.memory";
-
-function canUseLocalStorage() {
-  return typeof window !== "undefined" && Boolean(window.localStorage);
-}
 
 function emptyMemory(): HouseholdMemorySnapshot {
   return {
@@ -21,19 +18,10 @@ function emptyMemory(): HouseholdMemorySnapshot {
 }
 
 export function getHouseholdMemory(): HouseholdMemorySnapshot {
-  if (!canUseLocalStorage()) return emptyMemory();
-
-  const storedMemory = window.localStorage.getItem(MEMORY_STORAGE_KEY);
-  if (!storedMemory) return emptyMemory();
-
-  try {
-    return {
-      ...emptyMemory(),
-      ...(JSON.parse(storedMemory) as HouseholdMemorySnapshot),
-    };
-  } catch {
-    return emptyMemory();
-  }
+  return {
+    ...emptyMemory(),
+    ...readStorageJson<Partial<HouseholdMemorySnapshot>>(MEMORY_STORAGE_KEY, {}),
+  };
 }
 
 export function saveHouseholdMemory(memory: HouseholdMemorySnapshot) {
@@ -45,9 +33,7 @@ export function saveHouseholdMemory(memory: HouseholdMemorySnapshot) {
     scoreHistory: memory.scoreHistory.slice(-30),
   };
 
-  if (canUseLocalStorage()) {
-    window.localStorage.setItem(MEMORY_STORAGE_KEY, JSON.stringify(nextMemory));
-  }
+  writeStorageJson(MEMORY_STORAGE_KEY, nextMemory);
 
   return nextMemory;
 }

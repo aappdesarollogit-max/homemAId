@@ -1,10 +1,12 @@
 "use client";
 
 import { useMemo, useState } from "react";
+import AlphaNotice from "@/components/dashboard/AlphaNotice";
 import AnalyticsEngine from "@/core/product/AnalyticsEngine";
 import FeedbackEngine from "@/core/product/FeedbackEngine";
 import RoadmapEngine from "@/core/product/RoadmapEngine";
 import { getProductSnapshot } from "@/core/product/ProductStorage";
+import { releaseInfo } from "@/lib/release";
 
 function downloadTextFile(filename: string, content: string, type: string) {
   const blob = new Blob([content], { type });
@@ -44,7 +46,7 @@ export default function ProductView() {
       <div className="mb-6 flex flex-col gap-4 lg:flex-row lg:items-end lg:justify-between">
         <div>
           <p className="text-xs font-black uppercase tracking-[0.18em] text-violet-300">
-            Alpha 1.1
+            {releaseInfo.releaseName} · {releaseInfo.appVersion}
           </p>
           <h1 className="mt-2 text-3xl font-black tracking-normal text-white sm:text-4xl">
             Product Intelligence
@@ -78,8 +80,12 @@ export default function ProductView() {
         </div>
       </div>
 
+      <AlphaNotice className="mb-6" />
+
       <div className="grid gap-3 sm:grid-cols-2 xl:grid-cols-4">
         {[
+          ["Release", releaseInfo.releaseName],
+          ["Build", releaseInfo.buildDate],
           ["Feedback abiertos", kpis.feedbackAbiertos],
           ["Feedback resueltos", kpis.feedbackResueltos],
           ["Bugs críticos", kpis.bugsCriticos],

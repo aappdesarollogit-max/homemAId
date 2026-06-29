@@ -7,13 +7,10 @@ import {
   getAssistantContext,
 } from "@/lib/services/assistant-service";
 import { publishDomainEvent } from "@/core/platform/events/EventBus";
+import { readStorageJson, writeStorageJson } from "@/lib/safe-storage";
 import type { AssistantContext, AssistantMessage } from "@/types/domain";
 
 const ASSISTANT_HISTORY_KEY = "homemaid.assistant.messages";
-
-function canUseLocalStorage() {
-  return typeof window !== "undefined" && Boolean(window.localStorage);
-}
 
 function createMessage(role: AssistantMessage["role"], content: string): AssistantMessage {
   const suffix =
@@ -30,41 +27,16 @@ function createMessage(role: AssistantMessage["role"], content: string): Assista
 }
 
 function getInitialMessages() {
-  if (!canUseLocalStorage()) {
-    return [
-      createMessage(
-        "assistant",
-        "Hola. Puedo ayudarte a revisar inventario, compras, gasto mensual y alertas del hogar.",
-      ),
-    ];
-  }
-
-  const storedMessages = window.localStorage.getItem(ASSISTANT_HISTORY_KEY);
-  if (!storedMessages) {
-    return [
-      createMessage(
-        "assistant",
-        "Hola. Puedo ayudarte a revisar inventario, compras, gasto mensual y alertas del hogar.",
-      ),
-    ];
-  }
-
-  try {
-    return JSON.parse(storedMessages) as AssistantMessage[];
-  } catch {
-    return [
-      createMessage(
-        "assistant",
-        "Hola. Puedo ayudarte a revisar inventario, compras, gasto mensual y alertas del hogar.",
-      ),
-    ];
-  }
+  return readStorageJson<AssistantMessage[]>(ASSISTANT_HISTORY_KEY, [
+    createMessage(
+      "assistant",
+      "Hola. Puedo ayudarte a revisar inventario, compras, gasto mensual y alertas del hogar.",
+    ),
+  ]);
 }
 
 function persistMessages(messages: AssistantMessage[]) {
-  if (canUseLocalStorage()) {
-    window.localStorage.setItem(ASSISTANT_HISTORY_KEY, JSON.stringify(messages));
-  }
+  writeStorageJson(ASSISTANT_HISTORY_KEY, messages);
 }
 
 export function useAssistant(selectedPrompt?: string) {

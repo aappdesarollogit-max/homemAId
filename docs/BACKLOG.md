@@ -19,6 +19,7 @@ Completado:
 
 Pendiente para siguientes releases:
 
+- Alpha 1.3: Adjuntar captura en feedback.
 - UI para resolver alertas manualmente.
 - Historial visual de score.
 - Export/import de memoria local.

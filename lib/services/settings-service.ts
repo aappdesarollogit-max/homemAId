@@ -1,5 +1,6 @@
 import { householdMembers, householdSummary } from "@/lib/mock-home";
 import { publishDomainEvent } from "@/core/platform/events/EventBus";
+import { readStorageJson, writeStorageJson } from "@/lib/safe-storage";
 import type { HouseholdMember, HouseholdSettings } from "@/types/domain";
 
 const SETTINGS_STORAGE_KEY = "homemaid.household.settings";
@@ -8,10 +9,6 @@ const MEMBERS_STORAGE_KEY = "homemaid.household.members";
 export type HouseholdSettingsUpdate = Partial<HouseholdSettings>;
 export type HouseholdMemberDraft = Omit<HouseholdMember, "id">;
 export type HouseholdMemberUpdate = Partial<HouseholdMemberDraft>;
-
-function canUseLocalStorage() {
-  return typeof window !== "undefined" && Boolean(window.localStorage);
-}
 
 function getInitialSettings(): HouseholdSettings {
   return {
@@ -63,34 +60,16 @@ function generateMemberId(name: string) {
 }
 
 export function getHouseholdSettings() {
-  if (!canUseLocalStorage()) return getInitialSettings();
-
-  const storedSettings = window.localStorage.getItem(SETTINGS_STORAGE_KEY);
-
-  if (!storedSettings) {
-    const initialSettings = getInitialSettings();
-    saveHouseholdSettings(initialSettings);
-    return initialSettings;
-  }
-
-  try {
-    return normalizeSettings({
-      ...getInitialSettings(),
-      ...(JSON.parse(storedSettings) as HouseholdSettings),
-    });
-  } catch {
-    const initialSettings = getInitialSettings();
-    saveHouseholdSettings(initialSettings);
-    return initialSettings;
-  }
+  return normalizeSettings({
+    ...getInitialSettings(),
+    ...readStorageJson<Partial<HouseholdSettings>>(SETTINGS_STORAGE_KEY, {}),
+  });
 }
 
 export function saveHouseholdSettings(settings: HouseholdSettings) {
   const normalizedSettings = normalizeSettings(settings);
 
-  if (canUseLocalStorage()) {
-    window.localStorage.setItem(SETTINGS_STORAGE_KEY, JSON.stringify(normalizedSettings));
-  }
+  writeStorageJson(SETTINGS_STORAGE_KEY, normalizedSettings);
 
   return normalizedSettings;
 }
@@ -111,21 +90,7 @@ export function updateHouseholdSettings(updates: HouseholdSettingsUpdate) {
 }
 
 export function getHouseholdMembers() {
-  if (!canUseLocalStorage()) return householdMembers;
-
-  const storedMembers = window.localStorage.getItem(MEMBERS_STORAGE_KEY);
-
-  if (!storedMembers) {
-    saveHouseholdMembers(householdMembers);
-    return householdMembers;
-  }
-
-  try {
-    return JSON.parse(storedMembers) as HouseholdMember[];
-  } catch {
-    saveHouseholdMembers(householdMembers);
-    return householdMembers;
-  }
+  return readStorageJson<HouseholdMember[]>(MEMBERS_STORAGE_KEY, householdMembers);
 }
 
 export function saveHouseholdMembers(members: HouseholdMember[]) {
@@ -136,9 +101,7 @@ export function saveHouseholdMembers(members: HouseholdMember[]) {
     avatar: member.avatar.trim() || member.name.trim().slice(0, 1).toUpperCase(),
   }));
 
-  if (canUseLocalStorage()) {
-    window.localStorage.setItem(MEMBERS_STORAGE_KEY, JSON.stringify(normalizedMembers));
-  }
+  writeStorageJson(MEMBERS_STORAGE_KEY, normalizedMembers);
 
   return normalizedMembers;
 }

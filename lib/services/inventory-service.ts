@@ -1,5 +1,6 @@
 import { inventoryProducts } from "@/lib/mock-home";
 import { publishDomainEvent } from "@/core/platform/events/EventBus";
+import { readStorageJson, writeStorageJson } from "@/lib/safe-storage";
 import type { InventoryProduct, ProductStatus } from "@/types/domain";
 
 const INVENTORY_STORAGE_KEY = "homemaid.inventory.products";
@@ -17,10 +18,6 @@ export type InventoryProductDraft = {
 };
 
 export type InventoryProductUpdate = Partial<InventoryProductDraft>;
-
-function canUseLocalStorage() {
-  return typeof window !== "undefined" && Boolean(window.localStorage);
-}
 
 function getStatusLabel(status: ProductStatus) {
   if (status === "out") return "Agotado";
@@ -89,32 +86,16 @@ export function calculateProductStatus(product: Pick<InventoryProduct, "currentS
 }
 
 export function getInventoryProducts() {
-  if (!canUseLocalStorage()) return getInitialProducts();
-
-  const storedProducts = window.localStorage.getItem(INVENTORY_STORAGE_KEY);
-
-  if (!storedProducts) {
-    const initialProducts = getInitialProducts();
-    saveInventoryProducts(initialProducts);
-    return initialProducts;
-  }
-
-  try {
-    const parsedProducts = JSON.parse(storedProducts) as InventoryProduct[];
-    return parsedProducts.map(normalizeProduct);
-  } catch {
-    const initialProducts = getInitialProducts();
-    saveInventoryProducts(initialProducts);
-    return initialProducts;
-  }
+  return readStorageJson<InventoryProduct[]>(
+    INVENTORY_STORAGE_KEY,
+    getInitialProducts(),
+  ).map(normalizeProduct);
 }
 
 export function saveInventoryProducts(products: InventoryProduct[]) {
   const normalizedProducts = products.map(normalizeProduct);
 
-  if (canUseLocalStorage()) {
-    window.localStorage.setItem(INVENTORY_STORAGE_KEY, JSON.stringify(normalizedProducts));
-  }
+  writeStorageJson(INVENTORY_STORAGE_KEY, normalizedProducts);
 
   return normalizedProducts;
 }
