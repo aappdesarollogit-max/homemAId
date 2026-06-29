@@ -1,4 +1,8 @@
+"use client";
+
+import { useEffect, useState } from "react";
 import Link from "next/link";
+import { isFirstRun } from "@/lib/services/first-run-service";
 
 function BrandPanel() {
   return (
@@ -49,6 +53,12 @@ function BrandPanel() {
 }
 
 export default function LoginPage() {
+  const [needsSetup, setNeedsSetup] = useState<boolean | undefined>();
+
+  useEffect(() => {
+    queueMicrotask(() => setNeedsSetup(isFirstRun()));
+  }, []);
+
   return (
     <main className="min-h-screen bg-[#060814] px-6 py-10 text-white">
       <div className="mx-auto grid min-h-[calc(100vh-5rem)] max-w-6xl gap-10 lg:grid-cols-[1fr_440px] lg:items-center">
@@ -68,6 +78,23 @@ export default function LoginPage() {
             tu hogar.
           </p>
 
+          {needsSetup === undefined ? (
+            <div className="mt-8 rounded-3xl border border-white/10 bg-white/[0.06] p-5 text-sm font-bold text-white/55">
+              Revisando configuración local...
+            </div>
+          ) : needsSetup ? (
+            <div className="mt-8 rounded-3xl border border-white/10 bg-white/[0.06] p-5">
+              <p className="text-sm font-bold text-white/75">
+                Aún no existe un hogar configurado.
+              </p>
+              <Link
+                href="/onboarding"
+                className="mt-4 block w-full rounded-2xl bg-violet-500 py-4 text-center font-black text-white shadow-xl shadow-violet-950/30 hover:bg-violet-400"
+              >
+                Crear mi hogar
+              </Link>
+            </div>
+          ) : (
           <form className="mt-8 space-y-5">
             <div>
               <label htmlFor="email" className="mb-2 block text-sm font-bold text-white/80">
@@ -106,6 +133,7 @@ export default function LoginPage() {
               Ingresar
             </Link>
           </form>
+          )}
 
           <p className="mt-7 text-center text-sm text-white/60">
             ¿No tienes cuenta?{" "}

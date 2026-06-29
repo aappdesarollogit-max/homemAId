@@ -37,3 +37,14 @@ export function writeStorageJson<T>(key: string, value: T) {
     return false;
   }
 }
+
+export function removeStorageItem(key: string) {
+  if (!isStorageAvailable()) return false;
+
+  try {
+    window.localStorage.removeItem(key);
+    return true;
+  } catch {
+    return false;
+  }
+}

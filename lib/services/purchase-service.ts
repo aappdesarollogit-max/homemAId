@@ -15,7 +15,7 @@ import { purchases as mockPurchases } from "@/lib/mock-home";
 import { readStorageJson, writeStorageJson } from "@/lib/safe-storage";
 import type { InventoryProduct, Purchase, PurchaseItem } from "@/types/domain";
 
-const PURCHASE_STORAGE_KEY = "homemaid.purchases";
+export const PURCHASE_STORAGE_KEY = "homemaid.purchases";
 
 export type PurchaseInput = {
   store: string;

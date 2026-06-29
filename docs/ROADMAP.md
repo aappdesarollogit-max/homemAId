@@ -11,6 +11,7 @@
 - Natural Language Input para compra rapida con previsualizacion.
 - Product Intelligence System para capturar feedback, bugs, ideas, decisiones, analitica y roadmap sugerido.
 - PWA ready y experiencia mobile-first.
+- First Run Experience para crear hogar, elegir demo o empezar vacio sin autenticacion real.
 
 ## Release Alpha
 
@@ -55,6 +56,17 @@
 - Exponer KPIs de Alpha Cerrada.
 - Exportar feedback en JSON y CSV.
 - Mantener OpenAI y Supabase fuera del alcance.
+
+## Alpha 1.3 - First Run Experience
+
+- Detectar primer uso desde configuracion local del hogar.
+- Bloquear entrada directa a dashboard si no existe hogar.
+- Crear onboarding en 4 pasos.
+- Permitir empezar con hogar vacio o datos demo.
+- Mostrar insignia de modo demostracion y accion para comenzar desde cero.
+- Mostrar bienvenida con checklist de primeros pasos.
+- Registrar eventos `first_run_started`, `onboarding_completed`, `demo_selected`, `empty_home_selected` y `welcome_completed`.
+- Mantener autenticacion real, OpenAI y Supabase fuera del alcance.
 
 ## Sprint 10 sugerido
 

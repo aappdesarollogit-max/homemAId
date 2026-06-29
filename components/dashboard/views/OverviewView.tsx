@@ -9,14 +9,10 @@ import { useHomeIntelligence } from "@/hooks/useHomeIntelligence";
 import { useInventory } from "@/hooks/useInventory";
 import { usePurchases } from "@/hooks/usePurchases";
 import { useSettings } from "@/hooks/useSettings";
-import {
-  formatCurrency,
-  householdSummary,
-  inventoryProducts,
-} from "@/lib/mock-home";
+import { formatCurrency, householdSummary } from "@/lib/mock-home";
 
 export default function OverviewView() {
-  const { monthlySpend, isLoaded } = usePurchases();
+  const { monthlySpend, purchases, isLoaded } = usePurchases();
   const { products, isLoaded: isInventoryLoaded } = useInventory("todos");
   const { settings } = useSettings();
   const { intelligenceSummary } = useHomeIntelligence();
@@ -25,15 +21,18 @@ export default function OverviewView() {
     owner: householdSummary.owner,
     monthlyBudget: householdSummary.monthlyBudget,
   };
-  const currentMonthlySpend = isLoaded ? monthlySpend : householdSummary.monthlySpend;
-  const currentInventoryProducts = isInventoryLoaded ? products : inventoryProducts;
+  const currentMonthlySpend = isLoaded ? monthlySpend : 0;
+  const currentInventoryProducts = isInventoryLoaded ? products : [];
+  const hasHouseholdData = currentInventoryProducts.length > 0 || purchases.length > 0;
   const budgetUsage =
     activeSettings.monthlyBudget > 0
       ? Math.round((currentMonthlySpend / activeSettings.monthlyBudget) * 100)
       : 0;
   const urgentProducts = currentInventoryProducts.filter((product) => product.status !== "ok");
   const firstUrgentProduct = urgentProducts[0] ?? currentInventoryProducts[0];
-  const intelligenceScore = intelligenceSummary?.healthScore ?? householdSummary.healthScore;
+  const intelligenceScore = hasHouseholdData
+    ? (intelligenceSummary?.healthScore ?? householdSummary.healthScore)
+    : 0;
   const riskLabel = intelligenceSummary?.riskLevel ?? "low";
   const topRecommendations = intelligenceSummary?.recommendations.slice(0, 2) ?? [];
   const topAlerts = intelligenceSummary?.alerts.slice(0, 2) ?? [];
@@ -117,6 +116,23 @@ export default function OverviewView() {
           </Link>
         }
       />
+
+      {isLoaded && isInventoryLoaded && !hasHouseholdData ? (
+        <section className="mb-6 rounded-[32px] border border-white/10 bg-white/[0.05] p-6">
+          <h2 className="text-2xl font-black">Tu hogar está listo para comenzar</h2>
+          <div className="mt-4 grid gap-3 md:grid-cols-3">
+            <p className="rounded-2xl bg-white/5 p-4 text-sm font-bold text-white/65">
+              Aún no tienes productos.
+            </p>
+            <p className="rounded-2xl bg-white/5 p-4 text-sm font-bold text-white/65">
+              Agrega tu primera compra.
+            </p>
+            <p className="rounded-2xl bg-white/5 p-4 text-sm font-bold text-white/65">
+              Comienza registrando tu inventario.
+            </p>
+          </div>
+        </section>
+      ) : null}
 
       <div className="grid gap-5 sm:grid-cols-2 xl:grid-cols-4">
         <MetricCard
@@ -235,9 +251,13 @@ export default function OverviewView() {
             </Link>
           </div>
           <div className="space-y-3">
-            {urgentProducts.map((product) => (
+            {urgentProducts.length > 0 ? urgentProducts.map((product) => (
               <InventoryRow key={product.id} product={product} />
-            ))}
+            )) : (
+              <p className="rounded-2xl bg-white/5 p-4 text-sm font-bold text-white/55">
+                Aún no tienes productos. Comienza registrando tu inventario.
+              </p>
+            )}
           </div>
         </section>
 
@@ -264,7 +284,11 @@ export default function OverviewView() {
                 + Registrar nueva compra
               </Link>
               <Link
-                href={`/dashboard?view=inventario&filter=criticos&product=${firstUrgentProduct?.id}&action=apertura`}
+                href={
+                  firstUrgentProduct
+                    ? `/dashboard?view=inventario&filter=criticos&product=${firstUrgentProduct.id}&action=apertura`
+                    : "/dashboard?view=inventario"
+                }
                 className="rounded-2xl bg-white/5 p-4 text-sm font-black hover:bg-white/10"
               >
                 Registrar apertura de producto

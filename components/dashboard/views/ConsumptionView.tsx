@@ -28,11 +28,11 @@ export default function ConsumptionView() {
     alerts,
     criticalProducts,
   } = useConsumption(activeBudget, settings?.budgetAlertThreshold ?? 80);
-  const visibleMonthlySpend = isLoaded ? monthlySpend : householdSummary.monthlySpend;
+  const visibleMonthlySpend = isLoaded ? monthlySpend : 0;
   const visibleBudgetUsage = isLoaded
     ? budgetUsage
     : activeBudget > 0
-      ? Math.round((householdSummary.monthlySpend / activeBudget) * 100)
+      ? Math.round((visibleMonthlySpend / activeBudget) * 100)
       : 0;
   const budgetRisk = intelligenceSummary?.riskLevel ?? "low";
   const visiblePatterns = intelligenceSummary?.patterns.slice(0, 3) ?? [];

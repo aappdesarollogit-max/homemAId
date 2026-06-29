@@ -1,4 +1,7 @@
 import Link from "next/link";
+import DashboardWelcomeChecklist from "@/components/dashboard/DashboardWelcomeChecklist";
+import DemoModeBanner from "@/components/dashboard/DemoModeBanner";
+import FirstRunGate from "@/components/dashboard/FirstRunGate";
 import { dashboardViews } from "@/lib/mock-home";
 import type { DashboardView } from "@/types/domain";
 import type { ReactNode } from "react";
@@ -71,7 +74,11 @@ export default function DashboardShell({
             </Link>
           </div>
 
-          {children}
+          <FirstRunGate>
+            <DemoModeBanner />
+            <DashboardWelcomeChecklist activeView={activeView} />
+            {children}
+          </FirstRunGate>
         </section>
       </div>
 

@@ -85,6 +85,28 @@ Settings Feedback -> core/product -> localStorage -> Product Dashboard -> JSON/C
 
 La vista administrativa se expone en `/dashboard?view=product`.
 
+## Alpha 1.3 - First Run Experience
+
+Alpha 1.3 agrega `lib/services/first-run-service.ts` como coordinador local del primer uso.
+
+Responsabilidades:
+
+- Detectar si existe una configuracion valida de hogar en `localStorage`.
+- Marcar inicio y finalizacion del onboarding.
+- Guardar modo demo o modo hogar vacio.
+- Cargar datos demo desde `mock-home` cuando el usuario lo solicita.
+- Guardar arrays vacios de inventario y compras cuando el usuario empieza desde cero.
+- Persistir checklist de bienvenida del dashboard.
+- Registrar eventos de Product Analytics.
+
+El flujo principal es:
+
+```text
+Landing/Login/Dashboard gate -> first-run-service -> Onboarding -> localStorage -> Dashboard
+```
+
+`DashboardShell` contiene la proteccion cliente para no renderizar el dashboard operativo si no hay hogar. La ruta `/onboarding` no implementa autenticacion; solo crea la configuracion local requerida para empezar.
+
 ## PWA
 
 La PWA usa `public/manifest.webmanifest`, metadata en `app/layout.tsx`, safe areas en CSS global y navegacion inferior mobile en `DashboardShell`.

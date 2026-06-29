@@ -3,7 +3,7 @@ import { publishDomainEvent } from "@/core/platform/events/EventBus";
 import { readStorageJson, writeStorageJson } from "@/lib/safe-storage";
 import type { InventoryProduct, ProductStatus } from "@/types/domain";
 
-const INVENTORY_STORAGE_KEY = "homemaid.inventory.products";
+export const INVENTORY_STORAGE_KEY = "homemaid.inventory.products";
 
 export type InventoryProductDraft = {
   name: string;

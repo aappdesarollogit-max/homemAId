@@ -92,7 +92,12 @@ export type AnalyticsEvent = {
     | "compra.creada"
     | "compra.cancelada"
     | "feedback.enviado"
-    | "asistente.usado";
+    | "asistente.usado"
+    | "first_run_started"
+    | "onboarding_completed"
+    | "demo_selected"
+    | "empty_home_selected"
+    | "welcome_completed";
   pantalla?: string;
   usuario?: string;
   fecha: string;

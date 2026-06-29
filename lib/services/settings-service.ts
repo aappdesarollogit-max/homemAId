@@ -3,14 +3,14 @@ import { publishDomainEvent } from "@/core/platform/events/EventBus";
 import { readStorageJson, writeStorageJson } from "@/lib/safe-storage";
 import type { HouseholdMember, HouseholdSettings } from "@/types/domain";
 
-const SETTINGS_STORAGE_KEY = "homemaid.household.settings";
-const MEMBERS_STORAGE_KEY = "homemaid.household.members";
+export const SETTINGS_STORAGE_KEY = "homemaid.household.settings";
+export const MEMBERS_STORAGE_KEY = "homemaid.household.members";
 
 export type HouseholdSettingsUpdate = Partial<HouseholdSettings>;
 export type HouseholdMemberDraft = Omit<HouseholdMember, "id">;
 export type HouseholdMemberUpdate = Partial<HouseholdMemberDraft>;
 
-function getInitialSettings(): HouseholdSettings {
+export function getInitialSettings(): HouseholdSettings {
   return {
     name: householdSummary.name,
     owner: householdSummary.owner,
@@ -44,7 +44,7 @@ function normalizeSettings(settings: HouseholdSettings): HouseholdSettings {
   };
 }
 
-function generateMemberId(name: string) {
+export function generateMemberId(name: string) {
   const base = name
     .toLowerCase()
     .normalize("NFD")

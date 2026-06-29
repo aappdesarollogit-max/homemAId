@@ -237,8 +237,12 @@ export default function InventoryView({
             ))
           ) : (
             <AppEmptyState
-              title="No encontramos productos"
-              description="Prueba con otra búsqueda o cambia los filtros activos."
+              title={products.length === 0 ? "Aún no tienes productos." : "No encontramos productos"}
+              description={
+                products.length === 0
+                  ? "Comienza registrando tu inventario."
+                  : "Prueba con otra búsqueda o cambia los filtros activos."
+              }
               action={
                 <AppButton type="button" onClick={() => setPanelMode("create")}>
                   Agregar producto

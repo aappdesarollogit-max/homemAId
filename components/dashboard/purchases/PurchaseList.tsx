@@ -60,7 +60,9 @@ export default function PurchaseList({
 
       {purchases.length === 0 ? (
         <div className="rounded-3xl border border-white/10 bg-white/[0.04] p-6 text-sm font-bold text-white/55">
-          No hay compras que coincidan con la búsqueda.
+          {searchTerm.trim()
+            ? "No hay compras que coincidan con la búsqueda."
+            : "Agrega tu primera compra."}
         </div>
       ) : null}
     </div>

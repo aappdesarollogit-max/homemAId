@@ -1,4 +1,5 @@
 import Link from "next/link";
+import FirstRunLandingActions from "@/components/first-run/FirstRunLandingActions";
 
 const features = [
   {
@@ -161,20 +162,7 @@ export default function Home() {
               desde una experiencia simple, visual y pensada para el día a día.
             </p>
 
-            <div className="mt-9 flex flex-col gap-4 sm:flex-row">
-              <Link
-                href="/registro"
-                className="rounded-2xl bg-violet-500 px-7 py-4 text-center font-black text-white shadow-xl shadow-violet-900/30 hover:bg-violet-400"
-              >
-                Comenzar
-              </Link>
-              <Link
-                href="/dashboard"
-                className="rounded-2xl border border-white/15 px-7 py-4 text-center font-black text-white hover:border-violet-300"
-              >
-                Ver dashboard
-              </Link>
-            </div>
+            <FirstRunLandingActions />
 
             <div className="mt-12 grid max-w-2xl gap-3 sm:grid-cols-2">
               {mvpGoals.map((goal) => (
