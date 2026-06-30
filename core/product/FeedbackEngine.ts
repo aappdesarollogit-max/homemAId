@@ -4,6 +4,7 @@ import {
   getProductSnapshot,
   updateProductSnapshot,
 } from "@/core/product/ProductStorage";
+import { publishDomainEvent } from "@/core/platform/events/EventBus";
 import type {
   Feedback,
   FeedbackType,
@@ -76,6 +77,15 @@ export default class FeedbackEngine {
     };
 
     appendFeedback(feedback);
+    publishDomainEvent({
+      type: "feedback.created",
+      source: "system",
+      payload: {
+        feedbackId: feedback.id,
+        type: feedback.tipo,
+        priority: feedback.prioridad,
+      },
+    });
     return feedback;
   }
 

@@ -63,3 +63,12 @@ Checklist mobile recomendado:
 | BUG-007 | Alta | Cerrado | "Registrar primera compra" navega a Compras con `mode=nueva` y abre el formulario de compra. |
 | BUG-008 | Media | Cerrado | "Probar compra rapida" navega a Compras con `mode=rapida`, destaca/enfoca la tarjeta y se completa solo al confirmar una compra desde texto. |
 | BUG-009 | Media | Cerrado | "Enviar primer feedback" navega a Ajustes > Feedback y se completa al guardar feedback. |
+
+## Alpha 2.0 - Hardening Discovery
+
+| ID | Prioridad | Estado | Resolucion |
+| --- | --- | --- | --- |
+| BUG-010 | Alta | Cerrado | Parser monolitico reemplazado por modulos especializados para montos, cantidades, tiendas, productos, limpieza y normalizacion. |
+| BUG-011 | Alta | Cerrado | Checklist inicial queda basado en eventos reales persistidos por Event Bus. |
+| BUG-012 | Media | Cerrado | Product Dashboard incluye metricas internas de calidad para parser, onboarding, feedback y errores criticos. |
+| BUG-013 | Media | Cerrado | Se agregan ayudas contextuales simples sin tooltips complejos. |

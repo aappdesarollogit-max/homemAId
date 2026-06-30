@@ -12,6 +12,7 @@
 - Product Intelligence System para capturar feedback, bugs, ideas, decisiones, analitica y roadmap sugerido.
 - PWA ready y experiencia mobile-first.
 - First Run Experience para crear hogar, elegir demo o empezar vacio sin autenticacion real.
+- Alpha 2.0 Hardening con Parser V2 modular, checklist event-driven, feature flags locales y Quality Dashboard.
 
 ## Release Alpha
 
@@ -67,6 +68,14 @@
 - Mostrar bienvenida con checklist de primeros pasos.
 - Registrar eventos `first_run_started`, `onboarding_completed`, `demo_selected`, `empty_home_selected` y `welcome_completed`.
 - Mantener autenticacion real, OpenAI y Supabase fuera del alcance.
+
+## Alpha 2.0 - Hardening Release
+
+- Refactorizar parser local en modulos especializados.
+- Medir calidad con Parser Success, Parser Fail, Onboarding Completion, Feedback enviados y Errores criticos.
+- Hacer que checklist inicial dependa de eventos reales.
+- Mantener Supabase, OpenAI y OCR fuera del alcance.
+- Documentar casos de prueba y score de calidad.
 
 ## Sprint 10 sugerido
 

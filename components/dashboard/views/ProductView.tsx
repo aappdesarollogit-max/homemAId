@@ -25,6 +25,7 @@ export default function ProductView() {
   const feedbackEngine = useMemo(() => new FeedbackEngine(), []);
   const roadmapEngine = useMemo(() => new RoadmapEngine(), []);
   const kpis = analyticsEngine.getKpis();
+  const qualityMetrics = analyticsEngine.getQualityMetrics();
   const roadmap = roadmapEngine.generateRoadmap();
   const recentFeedback = snapshot.feedback.slice(0, 6);
   const criticalBugs = snapshot.bugs.filter((bug) => bug.prioridad === "Crítica");
@@ -81,6 +82,26 @@ export default function ProductView() {
       </div>
 
       <AlphaNotice className="mb-6" />
+
+      <section className="mb-6 rounded-3xl border border-white/10 bg-white/[0.04] p-6">
+        <h2 className="text-2xl font-black">Quality Dashboard</h2>
+        <div className="mt-5 grid gap-3 sm:grid-cols-2 xl:grid-cols-5">
+          {[
+            ["Parser Success", qualityMetrics.parserSuccess],
+            ["Parser Fail", qualityMetrics.parserFail],
+            ["Onboarding Completion", `${qualityMetrics.onboardingCompletion}%`],
+            ["Feedback enviados", qualityMetrics.feedbackEnviados],
+            ["Errores críticos", qualityMetrics.erroresCriticos],
+          ].map(([label, value]) => (
+            <div key={label} className="rounded-2xl bg-white/5 p-4">
+              <p className="text-xs font-black uppercase tracking-[0.14em] text-white/40">
+                {label}
+              </p>
+              <p className="mt-2 text-2xl font-black">{String(value)}</p>
+            </div>
+          ))}
+        </div>
+      </section>
 
       <div className="grid gap-3 sm:grid-cols-2 xl:grid-cols-4">
         {[

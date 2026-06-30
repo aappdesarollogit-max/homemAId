@@ -3,14 +3,12 @@
 import { useEffect, useMemo, useState } from "react";
 import Link from "next/link";
 import {
+  refreshWelcomeChecklistFromEvents,
   getWelcomeState,
   markWelcomeCompleted,
-  updateWelcomeChecklist,
   type WelcomeStepId,
 } from "@/lib/services/first-run-service";
-import { getProductSnapshot } from "@/core/product/ProductStorage";
-import { getInventoryProducts } from "@/lib/services/inventory-service";
-import { getPurchases } from "@/lib/services/purchase-service";
+import { getEventBus } from "@/core/platform/events/EventBus";
 
 const steps: Array<{
   id: WelcomeStepId;
@@ -28,13 +26,26 @@ export default function DashboardWelcomeChecklist() {
 
   useEffect(() => {
     queueMicrotask(() => {
-      const nextState = updateWelcomeChecklist({
-        first_product: getInventoryProducts().length > 0,
-        first_purchase: getPurchases().length > 0,
-        first_feedback: getProductSnapshot().feedback.length > 0,
-      });
-      setState(nextState);
+      setState(refreshWelcomeChecklistFromEvents());
     });
+
+    const eventBus = getEventBus();
+    const unsubscribers = [
+      eventBus.subscribe("inventory.product.created", () =>
+        setState(refreshWelcomeChecklistFromEvents()),
+      ),
+      eventBus.subscribe("purchase.created", () =>
+        setState(refreshWelcomeChecklistFromEvents()),
+      ),
+      eventBus.subscribe("text.input.confirmed", () =>
+        setState(refreshWelcomeChecklistFromEvents()),
+      ),
+      eventBus.subscribe("feedback.created", () =>
+        setState(refreshWelcomeChecklistFromEvents()),
+      ),
+    ];
+
+    return () => unsubscribers.forEach((unsubscribe) => unsubscribe());
   }, []);
 
   const completedCount = useMemo(

@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useRef, useState } from "react";
+import ContextHelp from "@/components/ui/ContextHelp";
 import { formatCurrency } from "@/lib/mock-home";
 import type { ParsedPurchase } from "@/core/platform/input/InputTypes";
 
@@ -68,7 +69,10 @@ export default function QuickPurchaseCard({
           <p className="text-xs font-black uppercase tracking-[0.18em] text-violet-300">
             Compra rápida
           </p>
-          <h2 className="mt-2 text-2xl font-black">Registrar con texto</h2>
+          <div className="mt-2 flex items-center gap-3">
+            <h2 className="text-2xl font-black">Registrar con texto</h2>
+            <ContextHelp text="Escribe algo como: compre dos leches en Lider por 25 mil." />
+          </div>
         </div>
         {parsedPurchase ? (
           <span className="rounded-full bg-violet-500/20 px-3 py-1 text-xs font-black text-violet-200">

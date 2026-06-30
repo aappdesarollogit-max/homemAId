@@ -107,6 +107,35 @@ Landing/Login/Dashboard gate -> first-run-service -> Onboarding -> localStorage 
 
 `DashboardShell` contiene la proteccion cliente para no renderizar el dashboard operativo si no hay hogar. La ruta `/onboarding` no implementa autenticacion; solo crea la configuracion local requerida para empezar.
 
+## Alpha 2.0 - Hardening
+
+Parser V2 reemplaza el parser monolitico por modulos en `core/platform/input/parser/`:
+
+- `MoneyParser`: montos en pesos, miles y lucas.
+- `QuantityParser`: numeros y cantidades escritas.
+- `StoreParser`: tiendas y retail chileno comun.
+- `ProductParser`: productos, cantidades y singularizacion.
+- `SentenceCleaner`: ruido linguistico, fechas simples y preparacion de texto.
+- `NormalizationEngine`: normalizacion, titulos y singular/plural.
+- `RetailDictionary`: diccionario local de tiendas.
+
+El flujo queda:
+
+```text
+TextInputAdapter -> TextParser -> parser modules -> EntityResolver -> SmartInputFramework -> DataIngestionEngine
+```
+
+El checklist de bienvenida se actualiza desde Event Bus:
+
+```text
+inventory.product.created -> first_product
+purchase.created -> first_purchase
+text.input.confirmed -> quick_purchase
+feedback.created -> first_feedback
+```
+
+`lib/featureFlags.ts` contiene flags locales sin backend para documentar alcance Alpha.
+
 ## PWA
 
 La PWA usa `public/manifest.webmanifest`, metadata en `app/layout.tsx`, safe areas en CSS global y navegacion inferior mobile en `DashboardShell`.

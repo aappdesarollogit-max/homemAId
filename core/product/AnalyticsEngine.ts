@@ -68,4 +68,33 @@ export default class AnalyticsEngine {
       version: getReleaseLabel(),
     };
   }
+
+  getQualityMetrics() {
+    const snapshot = getProductSnapshot();
+    const platformEvents = getEventBus().getEvents();
+    const parserSuccess = platformEvents.filter((event) =>
+      ["input.normalized", "text.input.parsed", "text.input.confirmed"].includes(event.type),
+    ).length;
+    const parserFail = platformEvents.filter((event) =>
+      ["input.failed", "text.input.failed"].includes(event.type),
+    ).length;
+    const onboardingStarted = snapshot.analytics.filter(
+      (event) => event.tipo === "first_run_started",
+    ).length;
+    const onboardingCompleted = snapshot.analytics.filter(
+      (event) => event.tipo === "onboarding_completed",
+    ).length;
+    const onboardingCompletion =
+      onboardingStarted > 0 ? Math.round((onboardingCompleted / onboardingStarted) * 100) : 0;
+
+    return {
+      parserSuccess,
+      parserFail,
+      onboardingCompletion,
+      feedbackEnviados: snapshot.feedback.length,
+      erroresCriticos: snapshot.bugs.filter((bug) =>
+        bug.prioridad.normalize("NFD").replace(/[\u0300-\u036f]/g, "").toLowerCase().startsWith("crit"),
+      ).length,
+    };
+  }
 }

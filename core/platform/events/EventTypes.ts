@@ -8,6 +8,7 @@ export type DomainEventType =
   | "consumption.updated"
   | "settings.updated"
   | "assistant.message.sent"
+  | "feedback.created"
   | "intelligence.refreshed"
   | "input.received"
   | "input.normalized"

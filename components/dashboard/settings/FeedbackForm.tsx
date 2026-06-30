@@ -5,7 +5,6 @@ import AnalyticsEngine from "@/core/product/AnalyticsEngine";
 import FeedbackEngine from "@/core/product/FeedbackEngine";
 import type { FeedbackType, ProductPriority } from "@/core/product/ProductTypes";
 import { getReleaseLabel } from "@/lib/release";
-import { markWelcomeStepCompleted } from "@/lib/services/first-run-service";
 
 const feedbackTypes: FeedbackType[] = [
   "BUG",
@@ -53,7 +52,6 @@ export default function FeedbackForm() {
         priority: formValues.prioridad,
       },
     });
-    markWelcomeStepCompleted("first_feedback");
 
     setFormValues((currentValues) => ({
       ...currentValues,

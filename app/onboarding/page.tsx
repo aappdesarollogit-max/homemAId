@@ -2,6 +2,7 @@
 
 import { useMemo, useState } from "react";
 import { useRouter } from "next/navigation";
+import ContextHelp from "@/components/ui/ContextHelp";
 import {
   completeOnboarding,
   markStarted,
@@ -122,7 +123,10 @@ export default function OnboardingPage() {
 
           {step === 2 ? (
             <div>
-              <h1 className="text-3xl font-black">Datos del hogar</h1>
+              <div className="flex items-start justify-between gap-3">
+                <h1 className="text-3xl font-black">Datos del hogar</h1>
+                <ContextHelp text="Estos datos solo quedan en este navegador durante la Alpha." />
+              </div>
               <div className="mt-6 grid gap-4">
                 <label className="block">
                   <span className="mb-2 block text-sm font-black text-white/75">
@@ -167,7 +171,10 @@ export default function OnboardingPage() {
 
           {step === 3 ? (
             <div>
-              <h1 className="text-3xl font-black">Presupuesto y compras</h1>
+              <div className="flex items-start justify-between gap-3">
+                <h1 className="text-3xl font-black">Presupuesto y compras</h1>
+                <ContextHelp text="El presupuesto ayuda a calcular consumo cuando registres compras." />
+              </div>
               <div className="mt-6 grid gap-4">
                 <label className="block">
                   <span className="mb-2 block text-sm font-black text-white/75">
@@ -215,7 +222,10 @@ export default function OnboardingPage() {
 
           {step === 4 ? (
             <div>
-              <h1 className="text-3xl font-black">¿Cómo quieres comenzar?</h1>
+              <div className="flex items-start justify-between gap-3">
+                <h1 className="text-3xl font-black">¿Cómo quieres comenzar?</h1>
+                <ContextHelp text="El modo demo carga ejemplos. El hogar vacío empieza sin productos ni compras." />
+              </div>
               <div className="mt-6 grid gap-4">
                 <label
                   htmlFor="onboarding-mode-empty"

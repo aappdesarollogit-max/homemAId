@@ -1,4 +1,5 @@
 import AnalyticsEngine from "@/core/product/AnalyticsEngine";
+import { getEventBus } from "@/core/platform/events/EventBus";
 import { removeStorageItem, readStorageJson, writeStorageJson } from "@/lib/safe-storage";
 import {
   generateMemberId,
@@ -211,9 +212,14 @@ export function updateWelcomeChecklist(updates: Partial<Record<WelcomeStepId, bo
   return state;
 }
 
-export function markWelcomeStepCompleted(stepId: WelcomeStepId) {
+export function refreshWelcomeChecklistFromEvents() {
+  const events = getEventBus().getEvents();
+
   return updateWelcomeChecklist({
-    [stepId]: true,
+    first_product: events.some((event) => event.type === "inventory.product.created"),
+    first_purchase: events.some((event) => event.type === "purchase.created"),
+    quick_purchase: events.some((event) => event.type === "text.input.confirmed"),
+    first_feedback: events.some((event) => event.type === "feedback.created"),
   });
 }
 

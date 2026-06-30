@@ -10,7 +10,6 @@ import SectionHeader from "@/components/dashboard/SectionHeader";
 import AppBottomSheet from "@/components/ui/AppBottomSheet";
 import { usePurchases } from "@/hooks/usePurchases";
 import { getInventoryProducts } from "@/lib/services/inventory-service";
-import { markWelcomeStepCompleted } from "@/lib/services/first-run-service";
 import type { PurchaseInput } from "@/lib/services/purchase-service";
 import type { InventoryProduct } from "@/types/domain";
 
@@ -62,7 +61,6 @@ export default function PurchasesView({
 
   function handleCreateFromText(text: string) {
     const result = addPurchaseFromText(text);
-    markWelcomeStepCompleted("quick_purchase");
     setInventoryProducts(getInventoryProducts());
     setSelectedLocalPurchaseId(result.purchase.id);
     setPanelMode("detail");

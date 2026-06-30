@@ -85,3 +85,12 @@ Alpha 1.3 registra:
 - `welcome_completed`
 
 Estos eventos se guardan con `AnalyticsEngine` dentro de Product Intelligence local.
+
+## Alpha 2.0
+
+El checklist inicial ya no se completa por navegacion. Cada paso depende de eventos reales:
+
+- `inventory.product.created`
+- `purchase.created`
+- `text.input.confirmed`
+- `feedback.created`
