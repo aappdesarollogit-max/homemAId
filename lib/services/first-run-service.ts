@@ -125,7 +125,8 @@ function buildMembers(owner: string, memberCount: number): HouseholdMember[] {
 }
 
 export function isFirstRun() {
-  return !hasValidHouseholdSettings();
+  const state = getFirstRunState();
+  return !hasValidHouseholdSettings() || !state.onboardingComplete;
 }
 
 export function markStarted() {

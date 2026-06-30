@@ -11,8 +11,8 @@ import {
 type OnboardingForm = {
   householdName: string;
   owner: string;
-  memberCount: number;
-  monthlyBudget: number;
+  memberCount: string;
+  monthlyBudget: string;
   currency: string;
   favoriteStore: string;
   mode: OnboardingMode;
@@ -21,12 +21,23 @@ type OnboardingForm = {
 const initialForm: OnboardingForm = {
   householdName: "",
   owner: "",
-  memberCount: 1,
-  monthlyBudget: 0,
+  memberCount: "1",
+  monthlyBudget: "0",
   currency: "CLP",
   favoriteStore: "",
   mode: "empty",
 };
+
+function sanitizeIntegerInput(value: string) {
+  const digits = value.replace(/\D/g, "");
+  if (!digits) return "";
+  return digits.replace(/^0+(?=\d)/, "");
+}
+
+function parseIntegerInput(value: string, fallback: number) {
+  const parsedValue = Number(sanitizeIntegerInput(value));
+  return Number.isFinite(parsedValue) ? parsedValue : fallback;
+}
 
 export default function OnboardingPage() {
   const router = useRouter();
@@ -38,7 +49,7 @@ export default function OnboardingPage() {
     }
 
     if (step === 3) {
-      return formValues.monthlyBudget >= 0 && Boolean(formValues.currency.trim());
+      return parseIntegerInput(formValues.monthlyBudget, 0) >= 0 && Boolean(formValues.currency.trim());
     }
 
     return true;
@@ -60,13 +71,23 @@ export default function OnboardingPage() {
   }
 
   function handleFinish() {
-    completeOnboarding(formValues);
+    completeOnboarding({
+      ...formValues,
+      memberCount: parseIntegerInput(formValues.memberCount, 1),
+      monthlyBudget: parseIntegerInput(formValues.monthlyBudget, 0),
+    });
     router.push("/dashboard");
   }
 
+  function handleNumericFocus(event: React.FocusEvent<HTMLInputElement>) {
+    if (event.currentTarget.value === "0") {
+      event.currentTarget.select();
+    }
+  }
+
   return (
-    <main className="min-h-screen bg-[#060814] px-6 py-10 text-white">
-      <section className="mx-auto flex min-h-[calc(100vh-5rem)] max-w-3xl items-center">
+    <main className="h-[100dvh] overflow-y-auto bg-[#060814] px-4 py-6 pb-[calc(env(safe-area-inset-bottom)+1.5rem)] text-white sm:px-6 sm:py-10">
+      <section className="mx-auto flex min-h-[calc(100dvh-3rem)] max-w-3xl items-center">
         <div className="w-full rounded-[32px] border border-white/10 bg-white/[0.06] p-6 shadow-2xl shadow-black/30 sm:p-8">
           <div className="mb-8 flex items-center justify-between gap-4">
             <div>
@@ -92,7 +113,7 @@ export default function OnboardingPage() {
               <button
                 type="button"
                 onClick={handleStart}
-                className="mt-8 rounded-2xl bg-violet-500 px-6 py-4 font-black text-white"
+                className="min-touch mt-8 rounded-2xl bg-violet-500 px-6 py-4 font-black text-white"
               >
                 Comenzar
               </button>
@@ -130,14 +151,14 @@ export default function OnboardingPage() {
                     Cantidad de integrantes
                   </span>
                   <input
-                    type="number"
-                    min={1}
-                    max={12}
+                    inputMode="numeric"
+                    pattern="[0-9]*"
                     value={formValues.memberCount}
+                    onFocus={handleNumericFocus}
                     onChange={(event) =>
-                      updateField("memberCount", Number(event.target.value))
+                      updateField("memberCount", sanitizeIntegerInput(event.target.value))
                     }
-                    className="w-full rounded-2xl border border-white/10 bg-white px-4 py-3 font-bold text-slate-950 outline-none focus:border-violet-400"
+                    className="min-touch w-full rounded-2xl border border-white/10 bg-white px-4 py-3 font-bold text-slate-950 outline-none focus:border-violet-400"
                   />
                 </label>
               </div>
@@ -153,13 +174,14 @@ export default function OnboardingPage() {
                     Presupuesto mensual
                   </span>
                   <input
-                    type="number"
-                    min={0}
+                    inputMode="numeric"
+                    pattern="[0-9]*"
                     value={formValues.monthlyBudget}
+                    onFocus={handleNumericFocus}
                     onChange={(event) =>
-                      updateField("monthlyBudget", Number(event.target.value))
+                      updateField("monthlyBudget", sanitizeIntegerInput(event.target.value))
                     }
-                    className="w-full rounded-2xl border border-white/10 bg-white px-4 py-3 font-bold text-slate-950 outline-none focus:border-violet-400"
+                    className="min-touch w-full rounded-2xl border border-white/10 bg-white px-4 py-3 font-bold text-slate-950 outline-none focus:border-violet-400"
                   />
                 </label>
                 <label className="block">
@@ -195,14 +217,22 @@ export default function OnboardingPage() {
             <div>
               <h1 className="text-3xl font-black">¿Cómo quieres comenzar?</h1>
               <div className="mt-6 grid gap-4">
-                <label className="block cursor-pointer rounded-3xl border border-white/10 bg-white/[0.04] p-5">
+                <label
+                  htmlFor="onboarding-mode-empty"
+                  className={`block cursor-pointer rounded-3xl border p-5 transition ${
+                    formValues.mode === "empty"
+                      ? "border-violet-300 bg-violet-500/20"
+                      : "border-white/10 bg-white/[0.04]"
+                  }`}
+                >
                   <div className="flex gap-3">
                     <input
+                      id="onboarding-mode-empty"
                       type="radio"
                       name="mode"
                       checked={formValues.mode === "empty"}
                       onChange={() => updateField("mode", "empty")}
-                      className="mt-1"
+                      className="min-touch mt-1 h-11 w-11 accent-violet-400"
                     />
                     <div>
                       <p className="font-black">Empezar con mi hogar vacío</p>
@@ -213,14 +243,22 @@ export default function OnboardingPage() {
                     </div>
                   </div>
                 </label>
-                <label className="block cursor-pointer rounded-3xl border border-white/10 bg-white/[0.04] p-5">
+                <label
+                  htmlFor="onboarding-mode-demo"
+                  className={`block cursor-pointer rounded-3xl border p-5 transition ${
+                    formValues.mode === "demo"
+                      ? "border-violet-300 bg-violet-500/20"
+                      : "border-white/10 bg-white/[0.04]"
+                  }`}
+                >
                   <div className="flex gap-3">
                     <input
+                      id="onboarding-mode-demo"
                       type="radio"
                       name="mode"
                       checked={formValues.mode === "demo"}
                       onChange={() => updateField("mode", "demo")}
-                      className="mt-1"
+                      className="min-touch mt-1 h-11 w-11 accent-violet-400"
                     />
                     <div>
                       <p className="font-black">Cargar datos de ejemplo</p>
@@ -236,11 +274,11 @@ export default function OnboardingPage() {
           ) : null}
 
           {step > 1 ? (
-            <div className="mt-8 flex flex-col gap-3 sm:flex-row sm:justify-between">
+            <div className="sticky bottom-0 -mx-6 mt-8 flex flex-col gap-3 border-t border-white/10 bg-[#060814]/95 px-6 pb-[calc(env(safe-area-inset-bottom)+0.5rem)] pt-4 backdrop-blur sm:-mx-8 sm:flex-row sm:justify-between sm:px-8">
               <button
                 type="button"
                 onClick={() => setStep((currentStep) => Math.max(1, currentStep - 1))}
-                className="rounded-2xl border border-white/15 px-5 py-3 text-sm font-black text-white"
+                className="min-touch rounded-2xl border border-white/15 px-5 py-3 text-sm font-black text-white"
               >
                 Atrás
               </button>
@@ -249,7 +287,7 @@ export default function OnboardingPage() {
                   type="button"
                   disabled={!canContinue}
                   onClick={() => setStep((currentStep) => currentStep + 1)}
-                  className="rounded-2xl bg-violet-500 px-5 py-3 text-sm font-black text-white disabled:cursor-not-allowed disabled:bg-white/15 disabled:text-white/45"
+                  className="min-touch rounded-2xl bg-violet-500 px-5 py-3 text-sm font-black text-white disabled:cursor-not-allowed disabled:bg-white/15 disabled:text-white/45"
                 >
                   Continuar
                 </button>
@@ -257,7 +295,7 @@ export default function OnboardingPage() {
                 <button
                   type="button"
                   onClick={handleFinish}
-                  className="rounded-2xl bg-violet-500 px-5 py-3 text-sm font-black text-white"
+                  className="min-touch rounded-2xl bg-violet-500 px-5 py-3 text-sm font-black text-white"
                 >
                   Ir al Dashboard
                 </button>
