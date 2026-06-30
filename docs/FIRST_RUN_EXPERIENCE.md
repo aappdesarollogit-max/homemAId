@@ -69,8 +69,10 @@ Checklist:
 
 - Agregar primer producto.
 - Registrar primera compra.
-- Revisar consumo.
-- Probar el asistente.
+- Probar compra rapida.
+- Enviar primer feedback.
+
+Consumo no aparece en el checklist inicial. Cuando existe al menos una compra, Overview muestra la sugerencia secundaria "Ya puedes revisar tu consumo".
 
 ## Eventos Product Analytics
 

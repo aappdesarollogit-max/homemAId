@@ -121,11 +121,11 @@ export function resolvePromptId(promptId?: string) {
 }
 
 export function resolveInventoryAction(action?: string) {
-  return action === "apertura" ? action : undefined;
+  return action === "apertura" || action === "crear" ? action : undefined;
 }
 
 export function resolvePurchaseMode(mode?: string) {
-  return mode === "nueva" ? mode : undefined;
+  return mode === "nueva" || mode === "rapida" ? mode : undefined;
 }
 
 export function resolveSettingsSection(section?: string) {

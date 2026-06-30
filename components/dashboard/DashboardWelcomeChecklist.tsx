@@ -8,42 +8,34 @@ import {
   updateWelcomeChecklist,
   type WelcomeStepId,
 } from "@/lib/services/first-run-service";
+import { getProductSnapshot } from "@/core/product/ProductStorage";
 import { getInventoryProducts } from "@/lib/services/inventory-service";
 import { getPurchases } from "@/lib/services/purchase-service";
-import type { DashboardView } from "@/types/domain";
 
 const steps: Array<{
   id: WelcomeStepId;
   label: string;
   href: string;
 }> = [
-  { id: "first_product", label: "Agregar primer producto", href: "/dashboard?view=inventario" },
+  { id: "first_product", label: "Agregar primer producto", href: "/dashboard?view=inventario&action=crear" },
   { id: "first_purchase", label: "Registrar primera compra", href: "/dashboard?view=compras&mode=nueva" },
-  { id: "review_consumption", label: "Revisar consumo", href: "/dashboard?view=consumo" },
-  { id: "try_assistant", label: "Probar el asistente", href: "/dashboard?view=asistente" },
+  { id: "quick_purchase", label: "Probar compra rápida", href: "/dashboard?view=compras&mode=rapida" },
+  { id: "first_feedback", label: "Enviar primer feedback", href: "/dashboard?view=ajustes&settings=feedback" },
 ];
 
-export default function DashboardWelcomeChecklist({
-  activeView,
-}: {
-  activeView: DashboardView;
-}) {
+export default function DashboardWelcomeChecklist() {
   const [state, setState] = useState(() => getWelcomeState());
 
   useEffect(() => {
     queueMicrotask(() => {
-      const currentState = getWelcomeState();
       const nextState = updateWelcomeChecklist({
         first_product: getInventoryProducts().length > 0,
         first_purchase: getPurchases().length > 0,
-        review_consumption:
-          activeView === "consumo" || currentState.welcomeChecklist.review_consumption,
-        try_assistant:
-          activeView === "asistente" || currentState.welcomeChecklist.try_assistant,
+        first_feedback: getProductSnapshot().feedback.length > 0,
       });
       setState(nextState);
     });
-  }, [activeView]);
+  }, []);
 
   const completedCount = useMemo(
     () => steps.filter((step) => state.welcomeChecklist[step.id]).length,
@@ -81,7 +73,7 @@ export default function DashboardWelcomeChecklist({
             <Link
               key={step.id}
               href={step.href}
-              className="flex items-center gap-3 rounded-2xl bg-white/5 p-4 text-sm font-bold text-white/75 hover:bg-white/10"
+              className="min-touch flex items-center gap-3 rounded-2xl bg-white/5 p-4 text-sm font-bold text-white/75 hover:bg-white/10"
             >
               <span className="flex h-6 w-6 items-center justify-center rounded-lg border border-white/20 bg-black/20 text-xs">
                 {isDone ? "✓" : ""}

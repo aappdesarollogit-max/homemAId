@@ -76,7 +76,7 @@ export default function DashboardShell({
             </div>
 
             <DemoModeBanner />
-            <DashboardWelcomeChecklist activeView={activeView} />
+            <DashboardWelcomeChecklist />
             {children}
           </section>
         </div>

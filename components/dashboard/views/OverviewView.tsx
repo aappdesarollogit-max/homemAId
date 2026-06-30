@@ -134,6 +134,27 @@ export default function OverviewView() {
         </section>
       ) : null}
 
+      {isLoaded && purchases.length > 0 ? (
+        <section className="mb-6 rounded-3xl border border-emerald-300/20 bg-emerald-300/10 p-5">
+          <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+            <div>
+              <p className="text-xs font-black uppercase tracking-[0.16em] text-emerald-200">
+                Sugerencia
+              </p>
+              <p className="mt-1 text-sm font-bold text-emerald-50">
+                Ya puedes revisar tu consumo.
+              </p>
+            </div>
+            <Link
+              href="/dashboard?view=consumo"
+              className="min-touch rounded-2xl bg-white px-4 py-3 text-center text-sm font-black text-emerald-800"
+            >
+              Ver consumo
+            </Link>
+          </div>
+        </section>
+      ) : null}
+
       <div className="grid gap-5 sm:grid-cols-2 xl:grid-cols-4">
         <MetricCard
           icon="▤"

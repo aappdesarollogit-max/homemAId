@@ -53,3 +53,13 @@ Checklist mobile recomendado:
 - Seleccionar hogar vacio y demo tocando cualquier parte de la card.
 - Abrir `/dashboard?view=ajustes` sin onboarding completo y confirmar que no aparece navegacion de dashboard.
 - Completar onboarding vacio y confirmar estado vacio en Inicio, Inventario, Compras y Consumo.
+
+## Alpha 1.4 - Welcome Checklist Sweep
+
+| ID | Prioridad | Estado | Resolucion |
+| --- | --- | --- | --- |
+| BUG-005 | Media | Cerrado | Se elimina "Revisar consumo" del checklist inicial; consumo queda como sugerencia contextual en Overview cuando existe al menos una compra. |
+| BUG-006 | Alta | Cerrado | "Agregar primer producto" navega a Inventario con `action=crear` y abre el formulario de producto. El check se completa solo al existir un producto guardado. |
+| BUG-007 | Alta | Cerrado | "Registrar primera compra" navega a Compras con `mode=nueva` y abre el formulario de compra. |
+| BUG-008 | Media | Cerrado | "Probar compra rapida" navega a Compras con `mode=rapida`, destaca/enfoca la tarjeta y se completa solo al confirmar una compra desde texto. |
+| BUG-009 | Media | Cerrado | "Enviar primer feedback" navega a Ajustes > Feedback y se completa al guardar feedback. |

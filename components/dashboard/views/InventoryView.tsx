@@ -38,6 +38,7 @@ const statusOptions: Array<{ id: ProductStatus | "todos"; label: string }> = [
 export default function InventoryView({
   activeFilter,
   selectedProductId,
+  activeAction,
 }: InventoryViewProps) {
   const {
     products,
@@ -57,7 +58,9 @@ export default function InventoryView({
   } = useInventory(activeFilter);
   const { monthlySpend } = usePurchases();
   const { settings } = useSettings();
-  const [panelMode, setPanelMode] = useState<PanelMode>("detail");
+  const [panelMode, setPanelMode] = useState<PanelMode>(
+    activeAction === "crear" ? "create" : "detail",
+  );
   const [selectedLocalProductId, setSelectedLocalProductId] = useState(selectedProductId);
   const selectedProductCandidateId = selectedLocalProductId ?? selectedProductId;
 

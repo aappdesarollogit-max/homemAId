@@ -20,8 +20,8 @@ export type OnboardingMode = "empty" | "demo";
 export type WelcomeStepId =
   | "first_product"
   | "first_purchase"
-  | "review_consumption"
-  | "try_assistant";
+  | "quick_purchase"
+  | "first_feedback";
 
 export type FirstRunState = {
   onboardingComplete: boolean;
@@ -45,8 +45,8 @@ export type OnboardingInput = {
 const emptyChecklist: Record<WelcomeStepId, boolean> = {
   first_product: false,
   first_purchase: false,
-  review_consumption: false,
-  try_assistant: false,
+  quick_purchase: false,
+  first_feedback: false,
 };
 
 function trackFirstRunEvent(tipo: Parameters<AnalyticsEngine["track"]>[0]["tipo"]) {
@@ -211,6 +211,12 @@ export function updateWelcomeChecklist(updates: Partial<Record<WelcomeStepId, bo
   return state;
 }
 
+export function markWelcomeStepCompleted(stepId: WelcomeStepId) {
+  return updateWelcomeChecklist({
+    [stepId]: true,
+  });
+}
+
 export function markWelcomeCompleted() {
   trackFirstRunEvent("welcome_completed");
   return saveFirstRunState({
@@ -218,8 +224,8 @@ export function markWelcomeCompleted() {
     welcomeChecklist: {
       first_product: true,
       first_purchase: true,
-      review_consumption: true,
-      try_assistant: true,
+      quick_purchase: true,
+      first_feedback: true,
     },
   });
 }

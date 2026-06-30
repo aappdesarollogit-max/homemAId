@@ -1,21 +1,36 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { formatCurrency } from "@/lib/mock-home";
 import type { ParsedPurchase } from "@/core/platform/input/InputTypes";
 
 type QuickPurchaseCardProps = {
   onAnalyze: (text: string) => ParsedPurchase;
   onConfirm: (text: string) => void;
+  shouldFocus?: boolean;
 };
 
 const exampleText = "Compré 2 leches, pan y detergente en Lider por $18.500";
 
-export default function QuickPurchaseCard({ onAnalyze, onConfirm }: QuickPurchaseCardProps) {
+export default function QuickPurchaseCard({
+  onAnalyze,
+  onConfirm,
+  shouldFocus = false,
+}: QuickPurchaseCardProps) {
   const [text, setText] = useState("");
   const [parsedPurchase, setParsedPurchase] = useState<ParsedPurchase>();
   const [error, setError] = useState<string>();
+  const textareaRef = useRef<HTMLTextAreaElement>(null);
   const canConfirm = Boolean(parsedPurchase && parsedPurchase.products.length > 0);
+
+  useEffect(() => {
+    if (!shouldFocus) return;
+
+    queueMicrotask(() => {
+      textareaRef.current?.scrollIntoView({ behavior: "smooth", block: "center" });
+      textareaRef.current?.focus({ preventScroll: true });
+    });
+  }, [shouldFocus]);
 
   function handleAnalyze() {
     try {
@@ -41,7 +56,13 @@ export default function QuickPurchaseCard({ onAnalyze, onConfirm }: QuickPurchas
   }
 
   return (
-    <section className="mb-6 rounded-3xl border border-white/10 bg-white/[0.04] p-5">
+    <section
+      className={`mb-6 rounded-3xl border p-5 transition ${
+        shouldFocus
+          ? "border-violet-300 bg-violet-500/10 shadow-2xl shadow-violet-950/30"
+          : "border-white/10 bg-white/[0.04]"
+      }`}
+    >
       <div className="flex flex-col gap-2 sm:flex-row sm:items-start sm:justify-between">
         <div>
           <p className="text-xs font-black uppercase tracking-[0.18em] text-violet-300">
@@ -57,6 +78,7 @@ export default function QuickPurchaseCard({ onAnalyze, onConfirm }: QuickPurchas
       </div>
 
       <textarea
+        ref={textareaRef}
         value={text}
         onChange={(event) => setText(event.target.value)}
         placeholder={`Ejemplo:\n${exampleText}`}
